@@ -155,8 +155,8 @@ $l['logbook_no_participants']           = "Keine Teilnehmenden";
 $l['logbook_participant_former']        = "ehem.";
 $l['logbook_my_scenes_no_scenes']       = "Keine aktiven Szenen.";
 $l['logbook_my_scenes_active']          = "aktive Szenen";
-$l['logbook_my_scenes_open_of_total']        = "{1} von {2} Szenen offen";
-$l['logbook_my_scenes_open_range_of_total']  = "{1}–{2} von {3} Szenen offen";
+$l['logbook_my_scenes_open_of_total']        = "<strong>{1}</strong> von <strong>{2}</strong> Szenen offen";
+$l['logbook_my_scenes_open_range_of_total']  = "<strong>{1}–{2}</strong> von <strong>{3}</strong> Szenen offen";
 
 // === Szenen-Info-Box (showthread) ===
 $l['logbook_scene_info_participants']   = "Teilnehmende";

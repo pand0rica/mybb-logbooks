@@ -126,10 +126,33 @@ To configure a per-scene override, edit the scene and set the **Posting Reminder
 
 ## Screenshots
 
-![Logbook CP Overview](docs/screenshots/logbook-cp.png)
+**Scene form when creating a new thread in an in-play forum**
+
 ![Scene Form on New Thread](docs/screenshots/scene-form.png)
-![Logbook Popup View](docs/screenshots/popup-view.png)
+
+**Scene info box shown inside the thread**
+
+![Scene Info Box in Thread](docs/screenshots/scene-threadview.png)
+
+**Logbook CP overview with scene statistics**
+
+![Logbook CP Overview](docs/screenshots/logbook-cp.png)
+
+**Overview of all active scenes across linked characters**
+
 ![My Scenes Overview](docs/screenshots/my-scenes.png)
+
+**Scenes widget on the forum index**
+
+![Scenes Widget on Index](docs/screenshots/scenes_index.png)
+
+**Posting reminder on the forum index**
+
+![Posting Reminder on Index](docs/screenshots/index_posterinnerung.png)
+
+**Logbook popup view**
+
+![Logbook Popup View](docs/screenshots/popup-view.png)
 
 ## Uninstallation
 

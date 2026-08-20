@@ -120,6 +120,58 @@
     position: relative;
     display: inline-block;
 }
+
+/* Chip/tag input – each selected participant becomes a removable token, like a
+   modern PM recipient field. The comma-joined value lives in a hidden input so
+   the backend keeps receiving the same "Name1, Name2" format. */
+.lb-tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    min-width: 300px;
+    max-width: 460px;
+    min-height: 26px;
+    padding: 3px 5px;
+    background: var(--lb-bg);
+    border: 1px solid var(--lb-border);
+    cursor: text;
+}
+.lb-tags.lb-focus {
+    border-color: var(--lb-accent, #5c8ec4);
+}
+.lb-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 6px;
+    font-size: 12px;
+    line-height: 1.4;
+    background: var(--lb-bg-head);
+    border: 1px solid var(--lb-border);
+    border-radius: 3px;
+    white-space: nowrap;
+}
+.lb-tag-x {
+    cursor: pointer;
+    font-weight: bold;
+    opacity: 0.6;
+}
+.lb-tag-x:hover {
+    opacity: 1;
+}
+.lb-tags-input {
+    flex: 1 1 80px;
+    min-width: 80px;
+    border: none;
+    outline: none;
+    background: transparent;
+    padding: 2px 0;
+    font-size: 12px;
+}
+.lb-ac-active {
+    background: var(--lb-bg-head);
+}
 .lb-ac-list {
     position: absolute;
     left: 0;
@@ -604,9 +656,13 @@
    My Scenes page – logbook.php?action=my_scenes
    -------------------------------------------------------------------------- */
 
-/* Page title bar with back link */
+/* Page title bar with back link.
+   Title + count line + filter bar are stacked flush to read as ONE panel:
+   the title bar forms the rounded top, so square off its bottom corners. */
 .lb-my-scenes-title-table {
-    margin-bottom: 1px;
+    margin-bottom: 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
 }
 
 .lb-my-scenes-back {
@@ -624,6 +680,26 @@
 .lb-my-scenes-back a:hover {
     opacity: 1;
     text-decoration: underline;
+}
+
+/* Count line – middle row of the panel (e.g. "5 of 14 scenes open").
+   No margins, no radius, only side + bottom borders: the title bar above and
+   the filter bar below supply the top/bottom, so the three read as one table. */
+.lb-my-scenes-total {
+    margin: 0;
+    padding: 7px 12px;
+    background: var(--lb-bg-subtle);
+    border-left: 1px solid var(--lb-border);
+    border-right: 1px solid var(--lb-border);
+    border-bottom: 1px solid var(--lb-border);
+    border-radius: 0;
+    font-size: 12px;
+    color: var(--lb-text-secondary);
+}
+
+.lb-my-scenes-total strong {
+    color: var(--lb-text);
+    font-weight: 600;
 }
 
 /* Space between character tables */
@@ -859,10 +935,16 @@
     margin-bottom: 10px;
 }
 
+/* Keep the form from introducing a gap between the count line and filter bar */
+.lb-filter-form {
+    margin: 0;
+}
+
 .lb-filter-bar {
     background: var(--lb-bg-subtle);
-    border: 1px solid var(--lb-border-light);
-    border-radius: 3px;
+    border: 1px solid var(--lb-border);
+    border-top: none;            /* attaches to the count line above */
+    border-radius: 0 0 3px 3px;  /* rounded bottom = end of the shared panel */
     padding: 10px 12px;
     display: flex;
     flex-direction: column;
