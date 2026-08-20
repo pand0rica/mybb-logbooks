@@ -1,0 +1,1 @@
+<li id="logbook_nav_menu"><a href="{$mybb->settings['bburl']}/logbook.php?action=my_scenes">{$lang->logbook_header_nav_link}</a></li>

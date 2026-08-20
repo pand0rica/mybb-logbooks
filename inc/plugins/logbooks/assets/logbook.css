@@ -1,0 +1,1209 @@
+/* =============================================================================
+   Logbook Plugin – Stylesheet v2.4
+   Scoped to .logbook-wrapper to avoid conflicts with global MyBB styles.
+   Builds on MyBB's standard classes: tborder, tcat, trow1, trow2, button.
+   The plugin never forces its own colors onto MyBB's structural elements –
+   headers, rows and buttons keep the active theme's look; only genuine accents
+   (reminder yellow, scene-type badges) add color.
+
+   All colors are defined as CSS custom properties on :root so they can be
+   overridden per theme in an extra stylesheet without touching this file.
+   Default values match the MyBB 1.8 "Default" theme palette.
+   ============================================================================= */
+
+/* --------------------------------------------------------------------------
+   CSS custom properties – default values = MyBB 1.8 Default theme
+   Override any of these in your theme's additional stylesheet.
+   -------------------------------------------------------------------------- */
+:root {
+    /* Table structure – row backgrounds come from MyBB's own trow1/trow2/tcat
+       classes, so only the few surfaces the plugin adds itself are defined here. */
+    --lb-border:            #cdd4dc;                /* outer tborder color */
+    --lb-border-light:      #e4e8ec;                /* inner dividers */
+    --lb-bg:                #FFFFFF;                /* form field background */
+    --lb-bg-head:           #EEF2F7;                /* subtle card/section header */
+    --lb-bg-subtle:         #eef2f7;                /* card header bg */
+    --lb-shadow:            rgba(0, 0, 0, 0.07);
+
+    /* Accent / primary action color */
+    --lb-accent:            #0072BC;                /* MyBB link/nav blue */
+    --lb-accent-dark:       #2B4468;                /* darker shade */
+    --lb-accent-subtle:     rgba(54, 86, 128, 0.10);/* focus glow */
+
+    /* Text hierarchy */
+    --lb-text:              #333333;
+    --lb-text-secondary:    #5A6E82;
+    --lb-text-muted:        #8a94a0;
+
+    /* Semantic: success (green) */
+    --lb-green:             #3c9a5f;
+    --lb-green-bg:          rgba(60, 154, 95, 0.12);
+    --lb-green-border:      rgba(60, 154, 95, 0.35);
+
+    /* Semantic: finished/neutral (slate) – its own accent instead of plain grey */
+    --lb-slate:             #6b7a8d;
+    --lb-slate-bg:          rgba(107, 122, 141, 0.12);
+    --lb-slate-border:      rgba(107, 122, 141, 0.32);
+}
+
+/* --------------------------------------------------------------------------
+   Wrapper – typography inherits from MyBB theme, no font override
+   -------------------------------------------------------------------------- */
+.logbook-wrapper {
+    /* Never let a wide table push past the forum content column.
+       If content is genuinely too wide it scrolls inside the wrapper
+       instead of breaking the surrounding forum layout. */
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+/* --------------------------------------------------------------------------
+   usercp_view scene table – keep every column inside the content column.
+   The table has no fixed layout, so making all text wrappable lets the
+   width:100% table shrink to fit rather than expanding to its content.
+   -------------------------------------------------------------------------- */
+.logbook-wrapper .lb-char-section {
+    max-width: 100%;
+}
+
+.logbook-wrapper .lb-scene-title-row {
+    min-width: 0;
+    flex-wrap: wrap;
+}
+
+.logbook-wrapper .lb-scene-subject,
+.logbook-wrapper .lb-scene-description {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+/* Meta strips (date, location, participants) wrap on desktop too */
+.logbook-wrapper .lb-scene-meta {
+    flex-wrap: wrap;
+}
+
+.logbook-wrapper .lb-scene-meta .logbook-thread-meta-item {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+/* Status and action cells: let the small buttons wrap instead of forcing
+   the whole table wider than the available space. */
+.logbook-wrapper .lb-next-up-cell,
+.logbook-wrapper .lb-lastpost-cell {
+    white-space: normal;
+}
+
+/* --------------------------------------------------------------------------
+   Layout utilities – replace former inline style="" attributes in templates
+   and PHP-built markup. Layout only, no colors imposed on the theme.
+   -------------------------------------------------------------------------- */
+.lb-inline-form   { display: inline; }
+.lb-align-right   { text-align: right; }
+.lb-cell-flush    { padding: 0; }
+.lb-table-flush   { margin: 0; }
+.lb-form-table    { width: auto; }
+.lb-hidden        { display: none; }
+.lb-input-title   { width: 100%; max-width: 400px; }
+.lb-input-narrow  { width: 70px; }
+.lb-user-select   { width: 300px; }
+.lb-inline-hint   { margin-left: 6px; }
+.lb-form-hint     { color: var(--lb-text-muted); }
+.lb-guide-body    { padding: 16px 20px; }
+.lb-guide-list    { margin: 0 0 16px; padding-left: 20px; }
+.lb-guide-list-tight { margin-bottom: 6px; }
+
+/* PM-style username autocomplete (participant field on the new-thread scene form).
+   Data comes from MyBB's own xmlhttp.php?action=get_users endpoint. */
+.lb-ac-wrap {
+    position: relative;
+    display: inline-block;
+}
+.lb-ac-list {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    z-index: 1000;
+    max-height: 180px;
+    overflow-y: auto;
+    background: var(--lb-bg);
+    border: 1px solid var(--lb-border);
+    border-top: none;
+}
+.lb-ac-item {
+    display: block;
+    padding: 4px 9px;
+    font-size: 12px;
+    cursor: pointer;
+}
+.lb-ac-item:hover {
+    background: var(--lb-bg-head);
+}
+
+/* --------------------------------------------------------------------------
+   Status dot indicator
+   -------------------------------------------------------------------------- */
+.lb-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.lb-status::before {
+    content: "";
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.lb-status-active::before  { background: var(--lb-green);  box-shadow: 0 0 0 2px var(--lb-green-bg); }
+.lb-status-finished::before { background: var(--lb-text-muted); }
+
+/* --------------------------------------------------------------------------
+   Action links – small pill buttons
+   -------------------------------------------------------------------------- */
+/* Action buttons use MyBB's native .button styling for their look.
+   .lb-action only adds layout: horizontal spacing, a little bottom margin so
+   stacked buttons don't touch, and nowrap so icon + label stay on one line.
+   All colors/borders/background come from the active theme's .button class. */
+.lb-action {
+    margin: 0 4px 3px 0;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+/* Link-based buttons (e.g. the edit link) render like real theme buttons. */
+.logbook-wrapper a.button {
+    display: inline-block;
+    text-decoration: none;
+}
+
+/* --------------------------------------------------------------------------
+   Navigation list on the logbook hub page
+   -------------------------------------------------------------------------- */
+.lb-nav-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.lb-nav-list li:last-child {
+    border-bottom: none;
+}
+
+.lb-nav-list li a.lb-nav-link {
+    display: block;
+    padding: 10px 14px 4px;
+}
+
+.lb-nav-list li a.lb-nav-link::before {
+    content: "›";
+    display: inline-block;
+    margin-right: 6px;
+    font-weight: 400;
+    color: var(--lb-text-muted);
+}
+
+.lb-nav-desc {
+    padding: 1px 14px 10px 32px;
+    font-size: 11px;
+}
+
+/* --------------------------------------------------------------------------
+   Statistics table
+   -------------------------------------------------------------------------- */
+/* Statistics table – uses MyBB's native tborder / thead / trow classes;
+   only the spacing above the table is added here. */
+.lb-stats {
+    margin-top: 12px;
+}
+
+/* --------------------------------------------------------------------------
+   Form elements
+   -------------------------------------------------------------------------- */
+
+/* Form label column */
+.logbook-wrapper .lb-form-label {
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--lb-text);
+    padding-right: 12px;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+/* --------------------------------------------------------------------------
+   Index page pending-scenes widget
+   Uses MyBB's native tborder / thead / trow1|trow2 classes for its look;
+   only the spacing below the widget is added here.
+   -------------------------------------------------------------------------- */
+.logbook-index-widget {
+    margin-bottom: 12px;
+}
+
+/* --------------------------------------------------------------------------
+   SVG icon base – dimensions only; color inherits from parent context
+   -------------------------------------------------------------------------- */
+.lb-icon {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+    vertical-align: middle;
+}
+
+/* =============================================================================
+   POPUP VIEW – Archive Noir – dark editorial theme
+   All popup-specific rules scoped to .logbook-popup-body
+   ============================================================================= */
+
+.logbook-popup-body {
+    margin: 0;
+    padding: 32px 16px 56px;
+    min-height: 100vh;
+}
+
+.lb-popup-wrap {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+#container.lb-popup-wrap {
+    max-width: 600px;
+	min-width: 0;
+    margin: 0 auto;
+}
+
+/* ── Header ── */
+.lb-popup-header {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--lb-accent-subtle);
+    margin-bottom: 22px;
+}
+
+.lb-popup-book-icon {
+    width: 22px;
+    height: 22px;
+    color: var(--lb-accent);
+    flex-shrink: 0;
+    opacity: 0.9;
+}
+
+.lb-popup-title {
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    color: var(--lb-accent);
+    margin: 0;
+    text-transform: uppercase;
+}
+
+/* ── Description ── */
+.lb-popup-intro {
+    font-size: 12px;
+    font-style: italic;
+    color: var(--lb-text-secondary);
+    line-height: 1.7;
+    margin-bottom: 22px;
+}
+
+.lb-popup-intro:empty {
+    display: none;
+}
+
+/* ── Scene cards ── */
+.lb-card {
+    background: var(--lb-bg-subtle);
+    border: 1px solid var(--lb-border);
+    border-radius: 4px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 2px var(--lb-shadow);
+    opacity: 0;
+    animation: lb-card-enter 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+@keyframes lb-card-enter {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.lb-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--lb-border-light);
+    gap: 12px;
+}
+
+.lb-card-title {
+    font-weight: 500;
+    font-size: 13px;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+.lb-badge {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+/* Status badges – theme-aware, readable on the active MyBB theme (light or dark) */
+.lb-badge .lb-status {
+    font-size: 9px;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 2px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.lb-badge .lb-status::before {
+    content: '';
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.lb-badge .lb-status-active {
+    background: var(--lb-green-bg);
+    color: var(--lb-green);
+    border: 1px solid var(--lb-green-border);
+}
+
+.lb-badge .lb-status-active::before {
+    background: var(--lb-green);
+}
+
+.lb-badge .lb-status-finished {
+    background: var(--lb-slate-bg);
+    color: var(--lb-slate);
+    border: 1px solid var(--lb-slate-border);
+}
+
+.lb-badge .lb-status-finished::before {
+    background: var(--lb-slate);
+}
+
+/* ── Card body ── */
+.lb-card-body {
+    padding: 10px 14px 13px;
+}
+
+.lb-card-meta {
+    list-style: none;
+    margin: 0 0 9px;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 18px;
+}
+
+.lb-card-meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-style: italic;
+    color: var(--lb-text-secondary);
+}
+
+.lb-card-participants {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--lb-text-secondary);
+    margin-bottom: 2px;
+}
+
+.lb-card-participants .lb-icon {
+    color: var(--lb-text-secondary);
+    margin-top: 1px;
+    flex-shrink: 0;
+}
+
+.lb-card-participants-list {
+    display: inline;
+}
+
+.lb-participant + .lb-participant::before {
+    content: ', ';
+}
+
+.lb-card-description {
+    font-size: 12px;
+    font-style: normal;
+    color: var(--lb-text-secondary);
+    margin-top: 9px;
+    padding-top: 9px;
+    border-top: 1px solid var(--lb-border-light);
+    line-height: 1.65;
+}
+
+.lb-card-description:empty {
+    display: none;
+}
+
+/* ── Notices (reused on non-popup pages too) ── */
+.logbook-notice {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px;
+    margin-bottom: 12px;
+    border-radius: 3px;
+    font-size: 12px;
+    border: 1px solid transparent;
+    border-left-width: 3px;
+    animation: lb-fadein 0.25s ease;
+}
+
+.logbook-notice::before {
+    flex-shrink: 0;
+    font-size: 14px;
+    line-height: 1;
+}
+
+.logbook-notice.success {
+    background: var(--lb-green-bg);
+    border-color: var(--lb-green-border);
+    border-left-color: var(--lb-green);
+    color: var(--lb-text);
+}
+
+.logbook-notice.success::before {
+    content: "✓";
+    color: var(--lb-green);
+    font-weight: 700;
+}
+
+@keyframes lb-fadein {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* --------------------------------------------------------------------------
+   Scene info box – shown between thread title and first post in showthread
+   Uses MyBB CSS variables to integrate with any active theme.
+   -------------------------------------------------------------------------- */
+.logbook-scene-info {
+    border: 1px solid var(--lb-border);
+    border-left: 3px solid var(--lb-accent);
+    background: var(--lb-bg-subtle);
+    border-radius: 0 3px 3px 0;
+    padding: 7px 14px;
+    margin-bottom: 10px;
+    font-size: 12px;
+}
+
+.logbook-scene-info-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0;
+}
+
+.logbook-scene-info-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 1px 16px 1px 0;
+    color: var(--lb-text-secondary);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.logbook-scene-info-item + .logbook-scene-info-item {
+    padding-left: 16px;
+    border-left: 1px solid var(--lb-border-light);
+}
+
+.logbook-scene-info .lb-icon {
+    color: var(--lb-text-muted);
+    width: 12px;
+    height: 12px;
+}
+
+.logbook-scene-info-value {
+    color: var(--lb-text);
+}
+
+/* --------------------------------------------------------------------------
+   Thread meta strip – rendered into $thread['description'] in forumdisplay
+   Uses MyBB CSS variables to integrate with any active theme.
+   -------------------------------------------------------------------------- */
+.logbook-thread-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0;
+    line-height: 1.4;
+    width: 100%;
+}
+
+.logbook-thread-meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--lb-text-muted);
+    padding-right: 10px;
+    white-space: nowrap;
+}
+
+.logbook-thread-meta-item + .logbook-thread-meta-item {
+    padding-left: 10px;
+    border-left: 1px solid var(--lb-border-light);
+}
+
+.logbook-thread-meta .lb-icon {
+    color: var(--lb-text-muted);
+    width: 11px;
+    height: 11px;
+    opacity: 0.75;
+}
+
+.logbook-thread-meta-badge {
+    margin-left: auto;
+    border-left: none !important;
+    padding-left: 0 !important;
+}
+
+/* --------------------------------------------------------------------------
+   My Scenes page – logbook.php?action=my_scenes
+   -------------------------------------------------------------------------- */
+
+/* Page title bar with back link */
+.lb-my-scenes-title-table {
+    margin-bottom: 1px;
+}
+
+.lb-my-scenes-back {
+    float: right;
+    font-weight: normal;
+    font-size: 11px;
+}
+
+.lb-my-scenes-back a {
+    color: inherit;
+    opacity: 0.8;
+    text-decoration: none;
+}
+
+.lb-my-scenes-back a:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+
+/* Space between character tables */
+.lb-char-section {
+    margin-bottom: 12px;
+    width: 100%;
+}
+
+/* Inline column-labels – hidden on desktop, shown on stacked mobile layout */
+.lb-mobile-label {
+    display: none;
+}
+
+.lb-char-section thead td {
+	font-weight: bold;
+}
+
+.lb-char-section td {
+	padding: 2px 8px;
+}
+
+/* Character name link in thead */
+.lb-char-link {
+    color: inherit;
+    text-decoration: none;
+}
+
+.lb-char-link:hover {
+    text-decoration: underline;
+}
+
+/* Active scene counter next to character name */
+.lb-char-scene-count {
+    float: right;
+    font-weight: normal;
+    font-size: 11px;
+    opacity: 0.75;
+}
+
+/* Wrapper so badge and title sit on the same line */
+.lb-scene-title-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Scene title link – matches forumdisplay subject style */
+.lb-scene-subject {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.lb-scene-link {
+    color: var(--lb-accent);
+    text-decoration: none;
+}
+
+.lb-scene-link:hover {
+    text-decoration: underline;
+    color: var(--lb-accent-dark);
+}
+
+/* Participants meta strip below the title */
+.lb-scene-meta {
+    display: flex;
+    margin-top: 4px;
+}
+
+.lb-scene-meta .logbook-thread-meta-item {
+    font-size: 11px;
+    color: var(--lb-text-muted);
+}
+
+.lb-scene-meta .lb-icon {
+    opacity: 0.7;
+}
+
+/* Date and location cells */
+.lb-my-scenes-cell {
+    vertical-align: middle;
+    white-space: nowrap;
+    color: var(--lb-text-secondary);
+}
+
+/* Italic time-of-day label */
+.lb-scene-time {
+    color: var(--lb-text-muted);
+    font-style: italic;
+}
+
+/* "You're next" turn indicator */
+.lb-your-turn {
+    display: inline-block;
+    padding: 2px 8px;
+    background: var(--lb-green-bg);
+    color: var(--lb-green);
+    border: 1px solid var(--lb-green-border);
+    border-radius: 2px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Scene type badges (AU / Unplayed / Planned) */
+.lb-badge-au,
+.lb-badge-unplayed,
+.lb-badge-planned {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 2px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.lb-badge-au {
+    background: rgba(164, 120, 255, 0.12);
+    color: #a478ff;
+    border: 1px solid rgba(164, 120, 255, 0.30);
+}
+
+.lb-badge-unplayed {
+    background: rgba(255, 160, 80, 0.12);
+    color: #e8903a;
+    border: 1px solid rgba(255, 160, 80, 0.30);
+}
+
+.lb-badge-planned {
+    background: rgba(80, 160, 255, 0.12);
+    color: #4e9aee;
+    border: 1px solid rgba(80, 160, 255, 0.30);
+}
+
+/* Inline description inside usercp_view scene rows */
+.lb-scene-description {
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--lb-text-secondary);
+    line-height: 1.65;
+}
+
+/* Separator between scene rows */
+.lb-my-scenes-row td {
+    border-bottom: 1px solid var(--lb-border-light);
+}
+
+.lb-scene-description:empty {
+    display: none;
+}
+
+/* No-thread placeholder in scene lists */
+.lb-no-thread {
+    color: var(--lb-text-muted, #7A8FA6);
+    font-size: 0.92em;
+}
+
+/* Solo-scene indicator – only 1 active participant left */
+.lb-solo-scene {
+    display: inline-block;
+    padding: 2px 8px;
+    background: var(--lb-warn-bg, #fffdf0);
+    color: var(--lb-warn, #c07800);
+    border: 1px solid var(--lb-warn-border, #e8c050);
+    border-radius: 2px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Free posting order indicator */
+.lb-free-order {
+    display: inline-block;
+    padding: 2px 8px;
+    background: var(--lb-muted-bg, #f0f2f5);
+    color: var(--lb-text-muted, #7A8FA6);
+    border: 1px solid var(--lb-border, #dde2e8);
+    border-radius: 2px;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+/* Former participant label – shown as "(ehem. X)" */
+.lb-participant-former {
+    color: var(--lb-text-muted, #7A8FA6);
+    font-style: italic;
+    font-size: 0.9em;
+}
+
+/* Next-up and last-post cells */
+.lb-next-up-cell {
+    vertical-align: middle;
+}
+
+.lb-lastpost-cell {
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.lb-lastpost-link {
+    color: var(--lb-text-secondary);
+    text-decoration: none;
+    font-size: 11px;
+}
+
+.lb-lastpost-link:hover {
+    color: var(--lb-accent);
+    text-decoration: underline;
+}
+
+/* Empty-state row */
+.lb-my-scenes-empty {
+    padding: 12px !important;
+    color: var(--lb-text-muted);
+    font-style: italic;
+}
+
+/* Shared lb-empty class used in other templates */
+.lb-empty {
+    padding: 10px !important;
+    color: var(--lb-text-muted);
+    font-style: italic;
+}
+
+/* --------------------------------------------------------------------------
+   Filter & Sort bar (my_scenes page)
+   -------------------------------------------------------------------------- */
+.lb-filter-section {
+    margin-bottom: 10px;
+}
+
+.lb-filter-bar {
+    background: var(--lb-bg-subtle);
+    border: 1px solid var(--lb-border-light);
+    border-radius: 3px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.lb-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.lb-filter-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--lb-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    min-width: 70px;
+    flex-shrink: 0;
+}
+
+.lb-filter-select {
+    font-size: 12px;
+    padding: 3px 6px;
+    border: 1px solid var(--lb-border);
+    border-radius: 2px;
+    background: var(--lb-bg);
+    color: var(--lb-text);
+    max-width: 220px;
+}
+
+.lb-filter-checkbox {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: var(--lb-text);
+    cursor: pointer;
+    line-height: 1;
+}
+
+.lb-filter-checkbox input[type="checkbox"] {
+    margin: 0;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+}
+
+.lb-filter-days-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: var(--lb-text);
+    cursor: default;
+}
+
+.lb-filter-input-days {
+    width: 52px;
+    padding: 3px 5px;
+    font-size: 12px;
+    border: 1px solid var(--lb-border);
+    border-radius: 2px;
+    background: var(--lb-bg);
+    color: var(--lb-text);
+    text-align: center;
+}
+
+.lb-filter-actions {
+    border-top: 1px solid var(--lb-border-light);
+    padding-top: 8px;
+    margin-top: 2px;
+}
+
+.lb-filter-btn {
+    font-size: 12px;
+    padding: 3px 12px;
+}
+
+.lb-filter-reset {
+    font-size: 11px;
+    color: var(--lb-text-muted);
+    text-decoration: none;
+}
+
+.lb-filter-reset:hover {
+    color: var(--lb-accent);
+    text-decoration: underline;
+}
+
+/* --------------------------------------------------------------------------
+   Index page – posting reminder bars
+   -------------------------------------------------------------------------- */
+:root {
+    --lb-warn:        #c07800;
+    --lb-warn-border: #e8c050;
+    --lb-warn-bg:     #fffdf0;
+    --lb-warn-head:   #fff8e1;
+}
+
+.lb-reminder-widget {
+    margin-bottom: 12px;
+    border: 1px solid var(--lb-warn-border);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.lb-reminder-header {
+    background: var(--lb-warn-head);
+    padding: 7px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--lb-warn);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--lb-warn-border);
+}
+
+.lb-reminder-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 10px;
+    background: var(--lb-warn-bg);
+    border-bottom: 1px solid var(--lb-warn-border);
+    font-size: 12px;
+}
+
+.lb-reminder-bar:last-child {
+    border-bottom: none;
+}
+
+.lb-reminder-bar-title {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.lb-reminder-bar-days {
+    color: var(--lb-warn);
+    font-size: 11px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* Button keeps the theme's native .button look – only layout is adjusted here,
+   so it never fights the active theme. The yellow accent of the reminder is
+   carried by the widget header, the bar background and the days label. */
+.lb-reminder-bar-btn {
+    flex-shrink: 0;
+}
+
+.lb-reminder-char-label {
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: bold;
+    background: var(--lb-warn-head);
+    border-top: 1px solid var(--lb-warn-border);
+    color: inherit;
+    opacity: 0.75;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive – my_scenes page (logbook.php?action=my_scenes)
+   At ≤768px: scene tables stack vertically, headers wrap, filters reflow.
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+    /* Page typography – slight downsize */
+    .logbook-wrapper {
+        font-size: 13px;
+    }
+
+    /* Title bar – back link wraps onto its own line */
+    .lb-my-scenes-title-table th.thead {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 6px 12px;
+    }
+    .lb-my-scenes-back {
+        float: none;
+        margin-left: auto;
+    }
+
+    /* Character thead – username and counter wrap if needed */
+    .lb-char-section thead th.thead {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 4px 10px;
+    }
+    .lb-char-scene-count {
+        float: none;
+        margin-left: auto;
+    }
+
+    /* Filter bar – label gets its own line, controls flow underneath */
+    .lb-filter-label {
+        min-width: 0;
+        width: 100%;
+    }
+    .lb-filter-select {
+        max-width: none;
+        flex: 1 1 140px;
+        min-width: 0;
+    }
+
+    /* Filter buttons full width for easier tapping */
+    .lb-filter-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .lb-filter-btn {
+        width: 100%;
+        padding: 6px 12px;
+    }
+    .lb-filter-reset {
+        text-align: center;
+        padding-top: 4px;
+    }
+
+    /* Character section table becomes a block stack so rows reflow vertically */
+    .lb-char-section,
+    .lb-char-section > tbody,
+    .lb-char-section > thead,
+    .lb-char-section > tbody > tr,
+    .lb-char-section > thead > tr,
+    .lb-char-section > tbody > tr > td,
+    .lb-char-section > thead > tr > th,
+    .lb-char-section > thead > tr > td {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Stronger visual separation between character sections in stacked mode */
+    .lb-char-section {
+        margin-bottom: 22px;
+        box-shadow: 0 1px 3px var(--lb-shadow);
+        border-radius: 3px;
+    }
+    .lb-char-section:last-of-type {
+        margin-bottom: 0;
+    }
+
+    /* Override the hardcoded 14% / 17% widths on scene table cells */
+    .lb-char-section td[width="14%"],
+    .lb-char-section td[width="17%"] {
+        width: 100%;
+    }
+
+    /* Hide the secondary column-header row – context is implied by stacking */
+    .lb-char-section thead tr.tcat {
+        display: none;
+    }
+
+    /* Scene rows visually separated as cards */
+    .lb-my-scenes-row {
+        padding: 12px 12px;
+        border-bottom: none;
+    }
+
+    /* Soft fading divider between consecutive scenes within the same character */
+    .lb-my-scenes-row + .lb-my-scenes-row {
+        background-image: linear-gradient(to right,
+            transparent 0%,
+            var(--lb-border-light) 18%,
+            var(--lb-border-light) 82%,
+            transparent 100%);
+        background-repeat: no-repeat;
+        background-position: top center;
+        background-size: 92% 3px;
+    }
+
+    .lb-my-scenes-row td {
+        padding: 4px 0;
+        border-bottom: none;
+        text-align: left !important;
+        white-space: normal;
+    }
+
+    /* Next-up indicator goes on top, lastpost goes at the bottom */
+    .lb-my-scenes-row .lb-next-up-cell {
+        font-size: 11px;
+        padding-bottom: 6px;
+    }
+
+    .lb-my-scenes-row .lb-lastpost-cell {
+        padding-top: 6px;
+        font-size: 11px;
+        opacity: 0.85;
+    }
+
+    /* Inline column-labels – clarify what the stacked value represents */
+    .lb-mobile-label {
+        display: inline-block;
+        margin-right: 6px;
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--lb-text-muted);
+    }
+
+    /* Meta strips – allow line-breaks instead of forcing nowrap */
+    .lb-scene-meta {
+        flex-wrap: wrap;
+        gap: 2px 0;
+    }
+    .lb-scene-meta .logbook-thread-meta-item {
+        white-space: normal;
+    }
+
+    /* Drop the vertical separators between meta items when wrapped */
+    .lb-scene-meta .logbook-thread-meta-item + .logbook-thread-meta-item {
+        border-left: none;
+        padding-left: 0;
+        padding-right: 10px;
+    }
+
+    /* Total-open label */
+    .lb-my-scenes-total {
+        font-size: 12px;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   Very small screens – tighten paddings further
+   -------------------------------------------------------------------------- */
+@media (max-width: 380px) {
+    .lb-filter-bar {
+        padding: 8px;
+    }
+    .lb-filter-row {
+        gap: 6px;
+    }
+    .lb-char-section td {
+        padding: 3px 6px;
+    }
+}

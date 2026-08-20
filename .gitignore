@@ -1,0 +1,38 @@
+# IDE
+.vscode/
+.vscode/sftp.json
+.idea/
+*.swp
+*.swo
+
+# Claude Code local settings (personal, not shared)
+.claude/settings.local.json
+
+# OS
+.DS_Store
+Thumbs.db
+*.stackdump
+
+# Debug screenshots
+bug.PNG
+
+# PHP / Composer (no external deps used)
+vendor/
+composer.lock
+
+# Backup & temp
+*.bak
+*.backup
+*.tmp
+*.sql
+
+# MyBB cache / uploads (never commit)
+cache/
+uploads/
+
+# Internal dev docs
+TESTING.md
+DELIVERY_SUMMARY.md
+
+# Forum post file (not part of code)
+PLUGIN_POST.html

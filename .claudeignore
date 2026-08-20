@@ -1,0 +1,19 @@
+# Git
+.git/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Irrelevant for code review
+docs/screenshots/
+*.png
+*.jpg
+*.gif
+
+# Crash artifacts
+*.stackdump
