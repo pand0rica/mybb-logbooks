@@ -22,8 +22,10 @@ All optional features are automatically disabled if the respective plugin is not
 
 ### Custom Database Tables
 
-A custom `mybb_config` table with a `name`/`wert` structure is required for the archive
-forum ID setting (`inplay_archive`). The `mybb_users.as_uid` column is provided by
+No custom tables are required. The archive forum is configured through the **Archive Forum**
+plugin setting. For backward compatibility, if a custom `mybb_config` table with a
+`name`/`wert` structure exists and contains an `inplay_archive` entry, it is used as a
+fallback when the setting is empty. The `mybb_users.as_uid` column is provided by
 EnhancedAccountSwitcher and does **not** need to be added manually.
 
 ## Installation
@@ -41,6 +43,7 @@ EnhancedAccountSwitcher and does **not** need to be added manually.
 | **In-Play Forums** | Multi-select of forums treated as in-play forums. The scene form only appears when creating a thread in one of these forums. |
 | **Allowed User Groups** | Multi-select of user groups that may use the logbook. Select none to allow all groups. |
 | **Posting Reminder (Days)** | Global default: show a reminder on the forum index when the user has not posted in a scene for this many days. 0 = disabled. Can be overridden per character and per scene. |
+| **Archive Forum** | Forum that finished threads are moved to once every participant has marked the scene as finished. Select none to disable moving. |
 
 ### User Settings (via `logbook.php?action=config`)
 

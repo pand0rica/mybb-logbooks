@@ -35,8 +35,9 @@ First public release. Substantially reworked, secured and extended.
 - Hooks for other plugins: `logbook_scene_created`, `logbook_scene_finished_changed`, `logbook_scene_thread_display`, `logbook_scene_showthread`, `logbook_index_data`, `logbook_user_logbook`, `logbook_user_stats`
 
 ### Configuration
-- ACP settings: in-play forums, allowed user groups, global reminder default
-- Settings persist across deactivate/reactivate and are only removed on a full uninstall
+- ACP settings: in-play forums, allowed user groups, global reminder default, archive forum
+- Archive forum is configured via a plugin setting; no custom database table required (a legacy `config` table is still honoured as a fallback)
+- Settings persist across deactivate/reactivate and are only removed on a full uninstall; reactivation adds any settings introduced in a newer version
 
 ### Theming
 - CSS registered in the MyBB theme system on activation (all themes) and removed on deactivation

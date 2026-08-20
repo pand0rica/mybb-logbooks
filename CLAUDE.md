@@ -10,12 +10,15 @@ automatisch erfasst.
 ### Abhängigkeiten (optionale Plugins)
 - **EnhancedAccountSwitcher** (https://github.com/jnschrag/EnhancedAccountSwitcher):
   Stellt `mybb_users.as_uid` bereit. `logbook_is_accountswitcher_active()` prüft per Plugin-Cache
-  ob es aktiv ist; nur dann wird die `as_uid`-Bedingung in `logbook_db_is_owner()` verwendet.
+  ob es aktiv ist; nur dann wird die `as_uid`-Bedingung in den Teilnehmer-/Eigentümer-Abfragen
+  (`logbook_db_get_participants()`, `logbook_db_get_linked_user_ids()`, `logbook_db_get_account_root()`) verwendet.
   Plugin-Cache-Key: `enhancedaccountswitcher`.
 
 ### Plugin-Settings (MyBB ACP → Konfiguration → Einstellungen → Logbook)
 - `logbook_inplay_forums` – kommagetrennte Forum-IDs für Inplay-Foren (ersetzt custom `inplay`-Spalte)
 - `logbook_allowed_groups` – kommagetrennte Usergroup-IDs die das Logbook nutzen dürfen; leer = alle
+- `logbook_reminder_days` – globaler Standard-Schwellwert für die Posting-Erinnerung (0 = aus)
+- `logbook_archive_forum` – Ziel-Forum, in das ein Thread verschoben wird, sobald alle Teilnehmer die Szene beendet haben (forumselect; leer = kein Verschieben)
 
 Settings werden in `logbook_activate()` angelegt. Sie **bleiben** bei Deaktivierung erhalten
 (damit die Konfiguration ein Reaktivieren übersteht) und werden erst in `logbook_uninstall()`
@@ -24,7 +27,11 @@ ergänzt im Else-Zweig fehlende Einzel-Settings (Upgrade-Pfad).
 
 ### Benutzerdefinierte DB-Spalten
 Keine custom Spalten mehr nötig (außer was andere Plugins hinzufügen).
-- `mybb_config.inplay_archive` – Forum-ID des Inplay-Archivs (in einer custom `config`-Tabelle)
+- Archiv-Forum: primär über Setting `logbook_archive_forum`. `logbook_db_get_archive_fid()`
+  liest zuerst das Setting; nur als abwärtskompatibler Fallback wird die Legacy-Tabelle
+  `mybb_config` (`name`/`wert`, Eintrag `inplay_archive`) gelesen – und das **nur** hinter
+  einem `$db->table_exists('config')`-Guard, damit Standardforen ohne diese Tabelle keinen
+  fatalen DB-Fehler bekommen.
 
 `mybb_users.as_uid` wird **nicht** manuell hinzugefügt – kommt vom EnhancedAccountSwitcher.
 

@@ -118,7 +118,7 @@ function logbook_uninstall(): void
 
     // Settings persist across deactivation and are only removed on a full
     // uninstall (mirrors logbook_activate()).
-    $db->delete_query('settings', "name IN ('logbook_inplay_forums','logbook_allowed_groups','logbook_reminder_days')");
+    $db->delete_query('settings', "name IN ('logbook_inplay_forums','logbook_allowed_groups','logbook_reminder_days','logbook_archive_forum')");
     $db->delete_query('settinggroups', "name = 'logbook'");
     rebuild_settings();
 
@@ -197,49 +197,69 @@ function logbook_activate(): void
         }
     }
 
-    // Plugin-Settings anlegen (nur wenn Gruppe noch nicht existiert)
-    $existing = $db->fetch_array($db->simple_select('settinggroups', 'gid', "name = 'logbook'"));
-    if (!$existing) {
-        $gid = $db->insert_query('settinggroups', [
-            'name'        => 'logbook',
-            'title'       => 'Logbook',
-            'description' => 'Settings for the Logbook plugin.',
-            'disporder'   => 1,
-            'isdefault'   => 0,
-        ]);
-
-        $db->insert_query('settings', [
+    // Plugin-Settings anlegen bzw. bei Upgrade fehlende Einzel-Settings ergänzen.
+    // Die settinggroup-Existenz allein darf nicht den ganzen Block überspringen,
+    // sonst fehlen bei Upgrades neu hinzugekommene Settings (z.B. logbook_archive_forum).
+    $setting_defs = [
+        [
             'name'        => 'logbook_inplay_forums',
             'title'       => 'In-Play Forums',
             'description' => 'Select all forums that are treated as in-play forums.',
             'optionscode' => 'forumselect',
             'value'       => '',
             'disporder'   => 1,
-            'gid'         => (int)$gid,
-        ]);
-
-        $db->insert_query('settings', [
+        ],
+        [
             'name'        => 'logbook_allowed_groups',
             'title'       => 'Allowed User Groups',
             'description' => 'Select all user groups that may use the logbook. Select none to allow all groups.',
             'optionscode' => 'groupselect',
             'value'       => '',
             'disporder'   => 2,
-            'gid'         => (int)$gid,
-        ]);
-
-        $db->insert_query('settings', [
+        ],
+        [
             'name'        => 'logbook_reminder_days',
             'title'       => 'Posting Reminder (Days)',
             'description' => 'Global default: show a reminder on the index if the user has not posted in a scene for this many days. 0 = disabled.',
             'optionscode' => 'text',
             'value'       => '0',
             'disporder'   => 3,
-            'gid'         => (int)$gid,
-        ]);
+        ],
+        [
+            'name'        => 'logbook_archive_forum',
+            'title'       => 'Archive Forum',
+            'description' => 'Threads whose scene has been finished by all participants are moved to this forum. Select none to disable moving.',
+            'optionscode' => 'forumselect',
+            'value'       => '',
+            'disporder'   => 4,
+        ],
+    ];
 
-        rebuild_settings();
+    $group = $db->fetch_array($db->simple_select('settinggroups', 'gid', "name = 'logbook'"));
+    if ($group) {
+        $gid = (int)$group['gid'];
+    } else {
+        $gid = (int)$db->insert_query('settinggroups', [
+            'name'        => 'logbook',
+            'title'       => 'Logbook',
+            'description' => 'Settings for the Logbook plugin.',
+            'disporder'   => 1,
+            'isdefault'   => 0,
+        ]);
     }
+
+    foreach ($setting_defs as $def) {
+        $exists = $db->fetch_array($db->simple_select(
+            'settings', 'sid', "name = '" . $db->escape_string($def['name']) . "'"
+        ));
+        if ($exists) {
+            continue; // keep existing value on upgrade/reactivation
+        }
+        $def['gid'] = $gid;
+        $db->insert_query('settings', $def);
+    }
+
+    rebuild_settings();
 
     logbook_install_alert_type();
 
@@ -336,9 +356,9 @@ function logbook_remove_from_template(string $title, string $remove): void
 }
 
 /**
- * Fügt die Plugin-Variablen in bestehende MyBB-Core-Templates ein.
+ * Gibt die UserCP-Navigationszeile (Logbook-Link) als HTML zurück.
  *
- * @return void
+ * @return string HTML-Zeile für die UserCP-Navigation
  */
 function logbook_usercp_nav_template(): string
 {
@@ -364,6 +384,12 @@ function logbook_remove_usercp_nav_link(): void
     );
 }
 
+/**
+ * Fügt die Plugin-Variablen in bestehende MyBB-Core-Templates ein
+ * (newthread, index, showthread, header, usercp_nav_misc).
+ *
+ * @return void
+ */
 function logbook_modify_templates(): void
 {
     logbook_inject_template(
@@ -631,18 +657,6 @@ function logbook_scene_count_active_participants(int $scene_id): int
 
     $row = $db->fetch_array($query);
     return (int)($row['cnt'] ?? 0);
-}
-
-/**
- * Prüft ob eine Szene nur noch einen aktiven Teilnehmer hat (Solo-Szene).
- * Solo-Szenen gelten in anderen Plugins als geschlossen.
- *
- * @param int $scene_id Szene-ID
- * @return bool true wenn nur 1 aktiver Teilnehmer übrig
- */
-function logbook_scene_is_solo(int $scene_id): bool
-{
-    return logbook_scene_count_active_participants($scene_id) === 1;
 }
 
 /**
@@ -1122,46 +1136,6 @@ function logbook_is_accountswitcher_active(): bool
 }
 
 /**
- * Prüft, ob ein Benutzer Eigentümer eines Logbook-Eintrags ist.
- * Berücksichtigt Account-Sharing via as_uid wenn EnhancedAccountSwitcher aktiv ist.
- *
- * @param int $user_id  Benutzer-ID
- * @param int $entry_id Logbook-Eintrag-ID
- * @return bool true wenn Eigentümer
- */
-function logbook_db_is_owner(int $user_id, int $entry_id): bool
-{
-    global $db;
-
-    if (logbook_is_accountswitcher_active()) {
-        $result = $db->query("
-            SELECT COUNT(*) AS anz
-            FROM " . TABLE_PREFIX . "logbook_entry e
-            JOIN " . TABLE_PREFIX . "logbook l ON e.logbook_id = l.id
-            JOIN " . TABLE_PREFIX . "users  u ON l.user_id = u.uid
-            WHERE (l.user_id = " . $user_id . "
-               OR u.as_uid   = " . $user_id . ")
-              AND e.id = " . $entry_id . "
-        ");
-    } else {
-        $result = $db->query("
-            SELECT COUNT(*) AS anz
-            FROM " . TABLE_PREFIX . "logbook_entry e
-            JOIN " . TABLE_PREFIX . "logbook l ON e.logbook_id = l.id
-            WHERE l.user_id = " . $user_id . "
-              AND e.id = " . $entry_id . "
-        ");
-    }
-
-    if ($result) {
-        $row = $db->fetch_array($result);
-        return (int)($row['anz'] ?? 0) > 0;
-    }
-
-    return false;
-}
-
-/**
  * Gibt einen Logbook-Eintrag anhand von Logbook-ID und Szene-ID zurück.
  *
  * @param int $logbook_id Logbook-ID
@@ -1281,21 +1255,40 @@ function logbook_db_get_popup_template_ids(): array
 }
 
 /**
- * Gibt die Forum-ID des Inplay-Archivs aus der config-Tabelle zurück.
+ * Gibt die Forum-ID des Inplay-Archivs zurück.
+ * Bevorzugt das Plugin-Setting logbook_archive_forum (self-contained, funktioniert
+ * auf jedem Forum). Als abwärtskompatibler Fallback wird die Legacy-Tabelle
+ * config gelesen – nur wenn sie existiert, damit Standardforen ohne diese
+ * Custom-Tabelle keinen fatalen DB-Fehler bekommen.
  *
- * @return int Forum-ID oder -1 wenn kein Eintrag vorhanden
+ * @return int Forum-ID oder -1 wenn keines konfiguriert ist
  */
 function logbook_db_get_archive_fid(): int
 {
-    global $db;
+    global $db, $mybb;
 
-    $result = $db->query("
-        SELECT wert FROM " . TABLE_PREFIX . "config WHERE name = 'inplay_archive'
-    ");
+    // Preferred: plugin setting (forumselect may hold a comma list, take the first fid).
+    $raw = isset($mybb->settings['logbook_archive_forum'])
+        ? trim((string)$mybb->settings['logbook_archive_forum'])
+        : '';
+    if ($raw !== '') {
+        $fids = array_values(array_filter(array_map('intval', explode(',', $raw))));
+        if (!empty($fids) && $fids[0] > 0) {
+            return $fids[0];
+        }
+    }
 
-    if ($result) {
-        $row = $db->fetch_array($result);
-        return $row ? (int)$row['wert'] : -1;
+    // Backward-compatible fallback: legacy custom `config` table (only if present).
+    if ($db->table_exists('config')) {
+        $result = $db->query("
+            SELECT wert FROM " . TABLE_PREFIX . "config WHERE name = 'inplay_archive'
+        ");
+        if ($result) {
+            $row = $db->fetch_array($result);
+            if ($row) {
+                return (int)$row['wert'];
+            }
+        }
     }
 
     return -1;
@@ -2421,7 +2414,8 @@ function logbook_render_my_scenes_characters(
 // =============================================================================
 
 /**
- * Hook: usercp_menu – Fügt einen Logbook-Link in die UserCP-Navigation ein.
+ * Hook: usercp_menu – Lädt die Sprachdatei, damit der per Template-Injektion
+ * eingefügte UserCP-Logbook-Link seine Beschriftung erhält.
  *
  * @return void
  */
