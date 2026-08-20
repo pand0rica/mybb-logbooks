@@ -6,7 +6,7 @@
  * in das er an Szenen teilnehmen, diese akzeptieren und bearbeiten kann.
  *
  * @package   Logbook
- * @author    Implex1v (original), pand0rica
+ * @author    pand0rica
  * @version   2.3.0
  * @license   GPL v3
  */
@@ -41,7 +41,7 @@ function logbook_info(): array
         "name"          => "Logbook",
         "description"   => "Verwaltet Inplay-Szenen im Logbook der Benutzer.",
         "website"       => "https://github.com/pand0rica/logbooks",
-        "author"        => "Implex1v, pand0rica",
+        "author"        => "pand0rica",
         "authorsite"    => "https://github.com/pand0rica",
         "version"       => "2.3.0",
         "guid"          => "",

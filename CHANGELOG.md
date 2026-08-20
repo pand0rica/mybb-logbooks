@@ -4,8 +4,7 @@ All notable changes to the Logbook plugin are documented here.
 
 ## [2.3.0] – First public release
 
-First public release. Based on the original Logbook plugin by Implex1v,
-substantially reworked, secured and extended.
+First public release. Substantially reworked, secured and extended.
 
 ### Scenes & logbooks
 - Personal logbook per user; scenes are captured automatically when a thread is created in an in-play forum
