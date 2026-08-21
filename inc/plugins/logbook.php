@@ -7,7 +7,7 @@
  *
  * @package   Logbook
  * @author    pand0rica
- * @version   2.3.0
+ * @version   2.0.0
  * @license   GPL v3
  */
 
@@ -43,7 +43,7 @@ function logbook_info(): array
         "website"       => "https://github.com/pand0rica/logbooks",
         "author"        => "pand0rica",
         "authorsite"    => "https://github.com/pand0rica",
-        "version"       => "2.3.0",
+        "version"       => "2.0.0",
         "guid"          => "",
         "codename"      => "logbook",
         "compatibility" => "18*",
@@ -1124,13 +1124,12 @@ function logbook_db_is_participant(int $scene_id, int $user_id): bool
  */
 function logbook_is_accountswitcher_active(): bool
 {
-    global $db;
+    global $db, $cache;
     // Primary check: the as_uid column exists (added by EnhancedAccountSwitcher).
     // Fallback: plugin cache lookup with the known cache key.
     if ($db->field_exists('as_uid', 'users')) {
         return true;
     }
-    global $cache;
     $plugins = $cache->read('plugins');
     return isset($plugins['active']['enhancedaccountswitcher']);
 }

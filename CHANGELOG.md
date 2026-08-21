@@ -2,7 +2,7 @@
 
 All notable changes to the Logbook plugin are documented here.
 
-## [2.3.0] – First public release
+## [2.0.0] – 2026-08-20 · First public release
 
 First public release. Substantially reworked, secured and extended.
 
