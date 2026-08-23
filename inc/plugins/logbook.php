@@ -669,16 +669,18 @@ function logbook_db_get_participants(int $scene_id): array
 {
     global $db;
 
-    $as_uid_filter = (logbook_is_accountswitcher_active() && $db->field_exists('as_uid', 'users'))
-        ? ' AND u.as_uid > 0'
-        : '';
-
+    // Show every recorded participant, exactly like the edit view
+    // (logbook_db_get_participants_raw). Earlier versions filtered
+    // "AND u.as_uid > 0", which silently hid any participant that is a main
+    // account (as_uid = 0) – on forums where players post on their main
+    // account this hid ALL participants everywhere except the edit view.
     $result = $db->query("
         SELECT l.user_id, u.username, e.finished
         FROM " . TABLE_PREFIX . "logbook_entry e
         JOIN " . TABLE_PREFIX . "logbook l ON e.logbook_id = l.id
         JOIN " . TABLE_PREFIX . "users u   ON l.user_id = u.uid
-        WHERE e.scene_id = " . $scene_id . $as_uid_filter . "
+        WHERE e.scene_id = " . $scene_id . "
+        ORDER BY e.id ASC
     ");
 
     $data = [];

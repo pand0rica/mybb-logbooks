@@ -2,6 +2,11 @@
 
 All notable changes to the Logbook plugin are documented here.
 
+## [Unreleased]
+
+### Fixed
+- Participants were hidden in all display views (thread view, scene info box, logbook view, popup, "current scenes") and only appeared in the edit view. Cause: the display query filtered `as_uid > 0`, silently dropping any participant that is a main account (`as_uid = 0`) whenever an account-switcher was installed. The display query now returns every recorded participant, consistent with the edit view.
+
 ## [2.0.0] – 2026-08-20 · First public release
 
 First public release. Substantially reworked, secured and extended.
