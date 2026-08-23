@@ -34,6 +34,31 @@ EnhancedAccountSwitcher and does **not** need to be added manually.
 2. Go to **ACP → Configuration → Plugins** and activate **Logbook**.
 3. Go to **ACP → Configuration → Settings → Logbook** and configure the plugin.
 
+## Theme Integration
+
+On activation the plugin injects its display variables into the standard MyBB
+templates automatically, so no manual template editing is needed on stock themes:
+
+| Template | Variable | Shows |
+|----------|----------|-------|
+| `showthread` | `{$logbook_scene_info}` | Scene info box above the posts in the thread view |
+| `forumdisplay_thread` | `{$thread['logbook_meta']}` | Scene meta strip (participants, location, date, time) in the thread listing |
+| `header` | `{$logbook_header_link}` | Logbook link in the header navigation |
+| `newthread` | `{$logbook_entry_add}` | Scene form on the new-thread page |
+| `index` | `{$logbookAccept}` | Reminder bar and scenes widget on the forum index |
+
+**Important notes:**
+
+- The injection runs against the templates that exist **at activation time**. If you
+  switch to, or import, a theme with its own customised templates **after** activating
+  the plugin, deactivate and reactivate **Logbook** once so the new templates receive
+  the variables.
+- If a heavily customised template does not contain the standard anchor, the variable
+  is not injected. In that case add it by hand in **ACP → Templates & Style → your
+  template set**: place `{$logbook_scene_info}` above `{$posts}` in `showthread`, and
+  `{$thread['logbook_meta']}` next to `{$thread['profilelink']}` (the author link) in
+  `forumdisplay_thread`.
+
 ## Configuration
 
 ### Admin Settings (ACP → Configuration → Settings → Logbook)
