@@ -612,7 +612,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   Thread meta strip – rendered into $thread['description'] in forumdisplay
+   Thread meta strip – rendered via $thread['logbook_meta'] in forumdisplay
    Uses MyBB CSS variables to integrate with any active theme.
    -------------------------------------------------------------------------- */
 .logbook-thread-meta {

@@ -6,6 +6,10 @@ All notable changes to the Logbook plugin are documented here.
 
 ### Fixed
 - Participants were hidden in all display views (thread view, scene info box, logbook view, popup, "current scenes") and only appeared in the edit view. Cause: the display query filtered `as_uid > 0`, silently dropping any participant that is a main account (`as_uid = 0`) whenever an account-switcher was installed. The display query now returns every recorded participant, consistent with the edit view.
+- Scene metadata (participants, location, date, time) did not appear in the thread listing on stock themes. Cause: the strip was written to `$thread['description']`, which stock MyBB only renders inside the thread link's `title` tooltip, not as visible markup — it only showed on themes whose `forumdisplay_thread` template had been customised. The strip is now written to a dedicated `$thread['logbook_meta']` variable that the plugin injects into `forumdisplay_thread` on activation, so it renders on any theme. Existing installs must deactivate + reactivate the plugin once to pick up the injection.
+
+### Changed
+- The thread listing no longer overwrites `$thread['description']` / blanks `$thread['profilelink']`; the real thread description and author link are left intact.
 
 ## [2.0.0] – 2026-08-20 · First public release
 

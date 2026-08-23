@@ -413,6 +413,16 @@ function logbook_modify_templates(): void
         '{$logbook_scene_info}'
     );
 
+    // Scene meta strip in the thread listing. Anchored on the author-link
+    // template variable (present in every stock forumdisplay_thread template)
+    // rather than surrounding HTML, so it survives theme variations.
+    logbook_inject_template(
+        'forumdisplay_thread',
+        '{$thread[\'profilelink\']}',
+        '{$thread[\'profilelink\']}{$thread[\'logbook_meta\']}',
+        '{$thread[\'logbook_meta\']}'
+    );
+
     logbook_inject_template(
         'header',
         '{$menu_memberlist}',
@@ -433,6 +443,7 @@ function logbook_remove_templates(): void
     logbook_remove_from_template('newthread',  '{$logbook_entry_add}' . "\n");
     logbook_remove_from_template('index',      '{$logbookAccept}');
     logbook_remove_from_template('showthread', '{$logbook_scene_info}' . "\n");
+    logbook_remove_from_template('forumdisplay_thread', '{$thread[\'logbook_meta\']}');
     logbook_remove_from_template('header',     "\n\t\t\t\t\t\t{" . '$logbook_header_link}');
     logbook_remove_usercp_nav_link();
 }
@@ -2536,6 +2547,11 @@ function logbook_handle_thread_display(): void
 
     $lang->load('logbook');
 
+    // Always define the template variable so the {$thread['logbook_meta']}
+    // placeholder injected into forumdisplay_thread renders empty (not an
+    // undefined-index warning) for non-scene rows.
+    $thread['logbook_meta'] = '';
+
     if (!logbook_is_thread_inplay((int)$thread['tid'])) {
         return;
     }
@@ -2555,7 +2571,6 @@ function logbook_handle_thread_display(): void
     ];
     $plugins->run_hooks('logbook_scene_thread_display', $hook_data);
 
-    $thread['profilelink'] = '';
     $member   = logbook_get_participant_string((int)$scene['id']);
     $location = htmlspecialchars_uni((string)($scene['ort'] ?? ''));
     $tag      = (int)$scene['tag'];
@@ -2576,7 +2591,10 @@ function logbook_handle_thread_display(): void
         . '<span class="logbook-thread-meta-item">' . $icon_clock . $zeit . '</span>'
         . ($scene_type_badge !== '' ? '<span class="logbook-thread-meta-item logbook-thread-meta-badge">' . $scene_type_badge . '</span>' : '');
 
-    $thread['description'] = '<span class="logbook-thread-meta">' . $items . '</span>';
+    // Rendered via the {$thread['logbook_meta']} placeholder that
+    // logbook_modify_templates() injects into forumdisplay_thread, so the strip
+    // shows on stock themes instead of relying on the tooltip-only description.
+    $thread['logbook_meta'] = '<span class="logbook-thread-meta">' . $items . '</span>';
 }
 
 /**
