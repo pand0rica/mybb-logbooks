@@ -276,6 +276,17 @@
     margin-top: 12px;
 }
 
+/* Scene statistics in the postbit author column (below the post count) */
+.lb-postbit-stats {
+    display: block;
+    margin-top: 4px;
+}
+
+/* Scene statistics table on the member profile (above the signature) */
+.lb-profile-stats {
+    margin-bottom: 10px;
+}
+
 /* --------------------------------------------------------------------------
    Form elements
    -------------------------------------------------------------------------- */

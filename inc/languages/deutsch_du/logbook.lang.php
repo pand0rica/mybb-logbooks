@@ -39,6 +39,8 @@ $l['logbook_stats']                     = "Statistiken";
 $l['logbook_stats_total']               = "Szenen gesamt";
 $l['logbook_stats_active']              = "Aktuelle Szenen";
 $l['logbook_stats_finished']            = "Beendete Szenen";
+$l['logbook_stats_overdue']             = "Überfällige Szenen";
+$l['logbook_stats_inplayposts']         = "Inplay-Beiträge";
 
 // === Seitenüberschriften (Tabellenköpfe) ===
 $l['logbook_page_cp']                   = "Logbook CP";

@@ -46,6 +46,8 @@ templates automatically, so no manual template editing is needed on stock themes
 | `header` | `{$logbook_header_link}` | Logbook link in the header navigation |
 | `newthread` | `{$logbook_entry_add}` | Scene form on the new-thread page |
 | `index` | `{$logbookAccept}` | Reminder bar and scenes widget on the forum index |
+| `postbit`, `postbit_classic` | `{$post['logbook_stats']}` | Scene statistics in the author column of every post |
+| `member_profile` | `{$logbook_profile_stats}` | Scene statistics block on the member profile |
 
 **Important notes:**
 
@@ -57,7 +59,9 @@ templates automatically, so no manual template editing is needed on stock themes
   is not injected. In that case add it by hand in **ACP → Templates & Style → your
   template set**: place `{$logbook_scene_info}` above `{$posts}` in `showthread`, and
   `{$thread['logbook_meta']}` next to `{$thread['profilelink']}` (the author link) in
-  `forumdisplay_thread`.
+  `forumdisplay_thread`. For the statistics blocks, place `{$post['logbook_stats']}`
+  after `{$post['user_details']}` in `postbit`/`postbit_classic`, and
+  `{$logbook_profile_stats}` before `{$signature}` in `member_profile`.
 
 ## Configuration
 
@@ -69,6 +73,8 @@ templates automatically, so no manual template editing is needed on stock themes
 | **Allowed User Groups** | Multi-select of user groups that may use the logbook. Select none to allow all groups. |
 | **Posting Reminder (Days)** | Global default: show a reminder on the forum index when the user has not posted in a scene for this many days. 0 = disabled. Can be overridden per character and per scene. |
 | **Archive Forum** | Forum that finished threads are moved to once every participant has marked the scene as finished. Select none to disable moving. |
+| **Postbit Statistics** | Which scene statistics are shown in the author column of every post: total scenes, active scenes, finished scenes, overdue scenes, in-play posts. Select none to disable the postbit block. |
+| **Profile Statistics** | Which scene statistics are shown as a block on the member profile (same options as the postbit). Select none to disable the profile block. |
 
 ### User Settings (via `logbook.php?action=config`)
 
@@ -151,6 +157,16 @@ The plugin shows a reminder bar on the forum index when:
 The reminder threshold follows a priority cascade: per-scene setting → per-character setting → ACP default.
 
 To configure a per-scene override, edit the scene and set the **Posting Reminder** field. Set it to 0 to fall back to the character or ACP default.
+
+### Scene Statistics in Postbit and Profile
+
+In addition to the statistics on the logbook page, the plugin can show a small scene-statistics block in the author column of every post and on the member profile.
+
+- Configure them under **ACP → Configuration → Settings → Logbook**: **Postbit Statistics** controls what appears in each post, **Profile Statistics** what appears on the profile. Each is a set of checkboxes — tick the values you want and leave the rest unticked (tick none to hide the block entirely).
+- Available values: **Total scenes**, **Active scenes**, **Finished scenes**, **Overdue scenes** and **In-play posts**. "In-play posts" counts the member's visible posts in the forums selected under **In-Play Forums**.
+- The blocks only appear for members whose group is permitted by the **Allowed User Groups** setting, so non-roleplay groups (e.g. a bot or system account) stay clean.
+
+![Scene statistics in the postbit](docs/screenshots/postbit-stats.png)
 
 ## Screenshots
 

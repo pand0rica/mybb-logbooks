@@ -4,6 +4,12 @@ All notable changes to the Logbook plugin are documented here.
 
 ## [Unreleased]
 
+## [2.1.0] – 2026-08-27
+
+### Added
+- Scene statistics in the postbit and on the member profile. Two new ACP settings (**Postbit Statistics**, **Profile Statistics**) let you choose per location which values are shown: total scenes, active scenes, finished scenes, overdue scenes and in-play posts. "In-play posts" counts a member's visible posts in the configured in-play forums. Both blocks are rendered from templates injected into `postbit`/`postbit_classic` (anchored on `{$post['user_details']}`) and `member_profile` (anchored on `{$signature}`); existing installs must deactivate + reactivate the plugin once to pick up the injection and the new settings. Only members whose group is allowed to use the logbook (setting **Allowed User Groups**) see the blocks.
+- `logbook_get_user_stats()` now also returns an `inplayposts` count and caches its result per request.
+
 ### Fixed
 - Participants were hidden in all display views (thread view, scene info box, logbook view, popup, "current scenes") and only appeared in the edit view. Cause: the display query filtered `as_uid > 0`, silently dropping any participant that is a main account (`as_uid = 0`) whenever an account-switcher was installed. The display query now returns every recorded participant, consistent with the edit view.
 - Scene metadata (participants, location, date, time) did not appear in the thread listing on stock themes. Cause: the strip was written to `$thread['description']`, which stock MyBB only renders inside the thread link's `title` tooltip, not as visible markup — it only showed on themes whose `forumdisplay_thread` template had been customised. The strip is now written to a dedicated `$thread['logbook_meta']` variable that the plugin injects into `forumdisplay_thread` on activation, so it renders on any theme. Existing installs must deactivate + reactivate the plugin once to pick up the injection.

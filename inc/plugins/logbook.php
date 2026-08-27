@@ -7,7 +7,7 @@
  *
  * @package   Logbook
  * @author    pand0rica
- * @version   2.0.0
+ * @version   2.1.0
  * @license   GPL v3
  */
 
@@ -25,6 +25,8 @@ $plugins->add_hook("global_start",                "logbook_register_myalerts_for
 $plugins->add_hook("xmlhttp",                     "logbook_register_myalerts_formatter");
 $plugins->add_hook("usercp_menu",                 "logbook_usercp_nav");
 $plugins->add_hook("global_intermediate",         "logbook_handle_header_link");
+$plugins->add_hook("postbit",                     "logbook_handle_postbit");
+$plugins->add_hook("member_profile_end",          "logbook_handle_profile");
 
 // =============================================================================
 // Plugin-Lifecycle
@@ -43,7 +45,7 @@ function logbook_info(): array
         "website"       => "https://github.com/pand0rica/logbooks",
         "author"        => "pand0rica",
         "authorsite"    => "https://github.com/pand0rica",
-        "version"       => "2.0.0",
+        "version"       => "2.1.0",
         "guid"          => "",
         "codename"      => "logbook",
         "compatibility" => "18*",
@@ -118,7 +120,7 @@ function logbook_uninstall(): void
 
     // Settings persist across deactivation and are only removed on a full
     // uninstall (mirrors logbook_activate()).
-    $db->delete_query('settings', "name IN ('logbook_inplay_forums','logbook_allowed_groups','logbook_reminder_days','logbook_archive_forum')");
+    $db->delete_query('settings', "name IN ('logbook_inplay_forums','logbook_allowed_groups','logbook_reminder_days','logbook_archive_forum','logbook_postbit_fields','logbook_profile_fields')");
     $db->delete_query('settinggroups', "name = 'logbook'");
     rebuild_settings();
 
@@ -174,7 +176,11 @@ function logbook_activate(): void
         }
     }
 
-    // Plugin-Templates aus .tpl-Dateien in die DB laden
+    // Plugin-Templates aus .tpl-Dateien in die DB laden.
+    // Vorher bereinigen, damit ein erneuter Aktivierungslauf (z.B. nach einem
+    // abgebrochenen Aktivieren) keine doppelten logbook_*-Templates anlegt.
+    $db->delete_query('templates', "title LIKE 'logbook%'");
+
     $template_dir = MYBB_ROOT . "inc/plugins/logbooks/templates/";
     if (is_dir($template_dir)) {
         $handle = opendir($template_dir);
@@ -232,6 +238,22 @@ function logbook_activate(): void
             'optionscode' => 'forumselect',
             'value'       => '',
             'disporder'   => 4,
+        ],
+        [
+            'name'        => 'logbook_postbit_fields',
+            'title'       => 'Postbit Statistics',
+            'description' => 'Select which logbook statistics are shown in each post, in the author column below the post count. Select none to disable.',
+            'optionscode' => "checkbox\ntotal=Total scenes\nactive=Active scenes\nfinished=Finished scenes\noverdue=Overdue scenes\ninplayposts=In-play posts",
+            'value'       => 'total,finished,inplayposts',
+            'disporder'   => 5,
+        ],
+        [
+            'name'        => 'logbook_profile_fields',
+            'title'       => 'Profile Statistics',
+            'description' => 'Select which logbook statistics are shown on the member profile page. Select none to disable.',
+            'optionscode' => "checkbox\ntotal=Total scenes\nactive=Active scenes\nfinished=Finished scenes\noverdue=Overdue scenes\ninplayposts=In-play posts",
+            'value'       => 'total,active,finished,inplayposts',
+            'disporder'   => 6,
         ],
     ];
 
@@ -430,6 +452,28 @@ function logbook_modify_templates(): void
         '{$logbook_header_link}'
     );
 
+    // Scene statistics in the author column of every post. MyBB evaluates the
+    // postbit_author_user sub-template into {$post['user_details']} BEFORE the
+    // 'postbit' hook runs, so the value would not exist yet inside that
+    // sub-template. Instead anchor on {$post['user_details']} in the main
+    // postbit templates, which are evaluated AFTER the hook has set the value.
+    foreach (['postbit', 'postbit_classic'] as $pb_tpl) {
+        logbook_inject_template(
+            $pb_tpl,
+            '{$post[\'user_details\']}',
+            '{$post[\'user_details\']}{$post[\'logbook_stats\']}',
+            '{$post[\'logbook_stats\']}'
+        );
+    }
+
+    // Scene statistics on the member profile, placed just above the signature.
+    logbook_inject_template(
+        'member_profile',
+        '{$signature}',
+        '{$logbook_profile_stats}{$signature}',
+        '{$logbook_profile_stats}'
+    );
+
     logbook_add_usercp_nav_link();
 }
 
@@ -445,6 +489,9 @@ function logbook_remove_templates(): void
     logbook_remove_from_template('showthread', '{$logbook_scene_info}' . "\n");
     logbook_remove_from_template('forumdisplay_thread', '{$thread[\'logbook_meta\']}');
     logbook_remove_from_template('header',     "\n\t\t\t\t\t\t{" . '$logbook_header_link}');
+    logbook_remove_from_template('postbit',         '{$post[\'logbook_stats\']}');
+    logbook_remove_from_template('postbit_classic', '{$post[\'logbook_stats\']}');
+    logbook_remove_from_template('member_profile',  '{$logbook_profile_stats}');
     logbook_remove_usercp_nav_link();
 }
 
@@ -869,6 +916,50 @@ function logbook_db_get_scene_unfinished_count(int $user_id): int
             SELECT id FROM " . TABLE_PREFIX . "logbook WHERE user_id = " . $user_id . "
           )
     ");
+
+    if ($result) {
+        $row = $db->fetch_array($result);
+        return (int)($row['anz'] ?? 0);
+    }
+
+    return 0;
+}
+
+/**
+ * Gibt die Anzahl der sichtbaren Beiträge eines Benutzers in den Inplay-Foren zurück.
+ * Ohne konfigurierte Inplay-Foren (leeres Setting) wird 0 geliefert; bei -1
+ * ("Alle Foren") zählen alle sichtbaren Beiträge des Benutzers.
+ *
+ * @param int $user_id Benutzer-ID
+ * @return int Anzahl der Inplay-Beiträge
+ */
+function logbook_db_get_inplay_post_count(int $user_id): int
+{
+    global $db, $mybb;
+
+    if ($user_id <= 0) {
+        return 0;
+    }
+
+    $raw = isset($mybb->settings['logbook_inplay_forums'])
+        ? trim((string)$mybb->settings['logbook_inplay_forums'])
+        : '';
+
+    if ($raw === '') {
+        return 0;
+    }
+
+    $where = "uid = " . $user_id . " AND visible = 1";
+
+    if ($raw !== '-1') {
+        $fids = logbook_get_inplay_fids();
+        if (empty($fids)) {
+            return 0;
+        }
+        $where .= " AND fid IN (" . implode(',', array_map('intval', $fids)) . ")";
+    }
+
+    $result = $db->query("SELECT COUNT(*) AS anz FROM " . TABLE_PREFIX . "posts WHERE " . $where);
 
     if ($result) {
         $row = $db->fetch_array($result);
@@ -1383,6 +1474,26 @@ function logbook_user_can_use(): bool
 {
     global $mybb;
 
+    return logbook_groups_allowed(
+        (int)$mybb->user['usergroup'],
+        (string)($mybb->user['additionalgroups'] ?? '')
+    );
+}
+
+/**
+ * Prüft, ob eine beliebige Usergroup-Kombination das Logbook nutzen darf.
+ * Basis für logbook_user_can_use() (aktueller User) sowie für die
+ * Postbit-/Profil-Statistik, wo der angezeigte Benutzer geprüft wird.
+ * Leeres Setting oder Wert -1 (= "Alle Gruppen") → immer true.
+ *
+ * @param int    $usergroup        Primäre Usergroup-ID
+ * @param string $additionalgroups Kommagetrennte zusätzliche Gruppen (kann leer sein)
+ * @return bool
+ */
+function logbook_groups_allowed(int $usergroup, string $additionalgroups): bool
+{
+    global $mybb;
+
     $raw = isset($mybb->settings['logbook_allowed_groups'])
         ? trim((string)$mybb->settings['logbook_allowed_groups'])
         : '';
@@ -1392,10 +1503,10 @@ function logbook_user_can_use(): bool
     }
 
     $allowed = array_filter(array_map('intval', explode(',', $raw)));
-    $user_groups = [(int)$mybb->user['usergroup']];
+    $user_groups = [$usergroup];
 
-    if (!empty($mybb->user['additionalgroups'])) {
-        $additional = array_filter(array_map('intval', explode(',', $mybb->user['additionalgroups'])));
+    if ($additionalgroups !== '') {
+        $additional = array_filter(array_map('intval', explode(',', $additionalgroups)));
         $user_groups = array_merge($user_groups, $additional);
     }
 
@@ -2123,8 +2234,9 @@ function logbook_get_user_logbook(int $uid): array
  *   uid      – Benutzer-ID
  *   total    – Gesamtanzahl Szenen
  *   active   – aktive (nicht abgeschlossene) Szenen
- *   finished – abgeschlossene Szenen
- *   overdue  – Szenen, in denen der Benutzer überfällig ist (Anzahl)
+ *   finished    – abgeschlossene Szenen
+ *   overdue     – Szenen, in denen der Benutzer überfällig ist (Anzahl)
+ *   inplayposts – sichtbare Beiträge in den Inplay-Foren
  *
  * @param int $uid Benutzer-ID
  * @return array Statistik-Array
@@ -2133,19 +2245,102 @@ function logbook_get_user_stats(int $uid): array
 {
     global $plugins;
 
+    // Per-request cache: postbit calls this once per unique poster on a page,
+    // so avoid recomputing the same user's stats for every post they made.
+    static $cache = [];
+    if (isset($cache[$uid])) {
+        return $cache[$uid];
+    }
+
     $stats = [
-        'uid'      => $uid,
-        'total'    => logbook_db_get_scene_count($uid),
-        'active'   => logbook_db_get_scene_unfinished_count($uid),
-        'finished' => logbook_db_get_scene_finished_count($uid),
-        'overdue'  => count(logbook_db_get_overdue_reminder_scenes($uid)),
+        'uid'         => $uid,
+        'total'       => logbook_db_get_scene_count($uid),
+        'active'      => logbook_db_get_scene_unfinished_count($uid),
+        'finished'    => logbook_db_get_scene_finished_count($uid),
+        'overdue'     => count(logbook_db_get_overdue_reminder_scenes($uid)),
+        'inplayposts' => logbook_db_get_inplay_post_count($uid),
     ];
 
     // Hook: other plugins can read or add to $stats.
     // Modify $stats directly inside the hook function (passed by reference).
     $plugins->run_hooks('logbook_user_stats', $stats);
 
+    $cache[$uid] = $stats;
+
     return $stats;
+}
+
+/**
+ * Rendert den Statistik-Block für Postbit oder Profil aus den je Ort
+ * konfigurierten Feldern (Settings logbook_postbit_fields / logbook_profile_fields).
+ * Gibt einen leeren String zurück, wenn kein Feld gewählt ist oder der
+ * angezeigte Benutzer laut Gruppen-Setting das Logbook nicht nutzen darf.
+ *
+ * @param int    $uid              UID des angezeigten Benutzers
+ * @param int    $usergroup        Primäre Usergroup des angezeigten Benutzers
+ * @param string $additionalgroups Zusätzliche Gruppen des angezeigten Benutzers
+ * @param string $context          'postbit' oder 'profile'
+ * @return string Fertiges HTML oder ''
+ */
+function logbook_render_stats_block(int $uid, int $usergroup, string $additionalgroups, string $context): string
+{
+    global $mybb, $lang, $templates, $theme;
+
+    if ($uid <= 0) {
+        return '';
+    }
+
+    $setting_key = $context === 'profile' ? 'logbook_profile_fields' : 'logbook_postbit_fields';
+    $raw = isset($mybb->settings[$setting_key]) ? trim((string)$mybb->settings[$setting_key]) : '';
+    if ($raw === '') {
+        return '';
+    }
+
+    $fields = array_values(array_filter(array_map('trim', explode(',', $raw))));
+    if (empty($fields)) {
+        return '';
+    }
+
+    // Only show for users whose group is allowed to use the logbook.
+    if (!logbook_groups_allowed($usergroup, $additionalgroups)) {
+        return '';
+    }
+
+    $lang->load('logbook');
+    $stats = logbook_get_user_stats($uid);
+
+    $label_map = [
+        'total'       => $lang->logbook_stats_total,
+        'active'      => $lang->logbook_stats_active,
+        'finished'    => $lang->logbook_stats_finished,
+        'overdue'     => $lang->logbook_stats_overdue,
+        'inplayposts' => $lang->logbook_stats_inplayposts,
+    ];
+
+    $row_template = $context === 'profile' ? 'logbook_profile_stats_row' : 'logbook_postbit_stats_row';
+
+    $rows = '';
+    $i    = 0;
+    foreach ($fields as $field) {
+        if (!isset($label_map[$field]) || !isset($stats[$field])) {
+            continue;
+        }
+        $label    = $label_map[$field];
+        $value    = my_number_format((int)$stats[$field]);
+        $rowclass = ($i % 2 === 0) ? 'trow1' : 'trow2';
+        eval('$rows .= "' . $templates->get($row_template) . '";');
+        $i++;
+    }
+
+    if ($rows === '') {
+        return '';
+    }
+
+    $block         = '';
+    $block_template = $context === 'profile' ? 'logbook_profile_stats' : 'logbook_postbit_stats';
+    eval('$block = "' . $templates->get($block_template) . '";');
+
+    return $block;
 }
 
 /**
@@ -2454,6 +2649,47 @@ function logbook_handle_header_link(): void
 
     $lang->load('logbook');
     eval('$logbook_header_link = "' . $templates->get('logbook_header_link') . '";');
+}
+
+/**
+ * Hook: postbit – Fügt den Szenen-Statistik-Block in die Autorenspalte jedes
+ * Beitrags ein (Template-Variable {$post['logbook_stats']}).
+ *
+ * @param array $post Beitrags-/Autorendaten (per Referenz)
+ * @return void
+ */
+function logbook_handle_postbit(array &$post): void
+{
+    $post['logbook_stats'] = logbook_render_stats_block(
+        (int)($post['uid'] ?? 0),
+        (int)($post['usergroup'] ?? 0),
+        (string)($post['additionalgroups'] ?? ''),
+        'postbit'
+    );
+}
+
+/**
+ * Hook: member_profile_end – Baut den Szenen-Statistik-Block für das Profil
+ * (Template-Variable {$logbook_profile_stats}).
+ *
+ * @return void
+ */
+function logbook_handle_profile(): void
+{
+    global $memprofile, $logbook_profile_stats;
+
+    $logbook_profile_stats = '';
+
+    if (empty($memprofile['uid'])) {
+        return;
+    }
+
+    $logbook_profile_stats = logbook_render_stats_block(
+        (int)$memprofile['uid'],
+        (int)($memprofile['usergroup'] ?? 0),
+        (string)($memprofile['additionalgroups'] ?? ''),
+        'profile'
+    );
 }
 
 /**

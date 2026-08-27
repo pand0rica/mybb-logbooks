@@ -19,6 +19,8 @@ automatisch erfasst.
 - `logbook_allowed_groups` – kommagetrennte Usergroup-IDs die das Logbook nutzen dürfen; leer = alle
 - `logbook_reminder_days` – globaler Standard-Schwellwert für die Posting-Erinnerung (0 = aus)
 - `logbook_archive_forum` – Ziel-Forum, in das ein Thread verschoben wird, sobald alle Teilnehmer die Szene beendet haben (forumselect; leer = kein Verschieben)
+- `logbook_postbit_fields` – checkbox: welche Statistik-Felder im Postbit erscheinen (total,active,finished,overdue,inplayposts); leer = aus
+- `logbook_profile_fields` – checkbox: welche Statistik-Felder im Profil erscheinen (gleiche Optionen); leer = aus
 
 Settings werden in `logbook_activate()` angelegt. Sie **bleiben** bei Deaktivierung erhalten
 (damit die Konfiguration ein Reaktivieren übersteht) und werden erst in `logbook_uninstall()`
@@ -64,6 +66,8 @@ Kein Klassen-Layer mehr – alle Funktionen sind prozedural mit `logbook_`-Präf
 | `global_start` / `xmlhttp` | `logbook_register_myalerts_formatter()` – MyAlerts-Formatter registrieren |
 | `usercp_menu` | `logbook_usercp_nav()` – Sprache laden für UserCP-Nav |
 | `global_intermediate` | `logbook_handle_header_link()` – Logbook-Link in Header-Navigation |
+| `postbit` | `logbook_handle_postbit()` – Szenen-Statistik in der Autorenspalte jedes Beitrags |
+| `member_profile_end` | `logbook_handle_profile()` – Szenen-Statistik-Block im Profil |
 
 ## Commit-Konventionen
 - Englische Commit-Messages

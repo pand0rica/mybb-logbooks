@@ -39,6 +39,8 @@ $l['logbook_stats']                     = "Statistics";
 $l['logbook_stats_total']               = "Total scenes";
 $l['logbook_stats_active']              = "Active scenes";
 $l['logbook_stats_finished']            = "Finished scenes";
+$l['logbook_stats_overdue']             = "Overdue scenes";
+$l['logbook_stats_inplayposts']         = "In-play posts";
 
 // === Page headings (table headers) ===
 $l['logbook_page_cp']                   = "Logbook CP";

@@ -1,0 +1,1 @@
+<span class="lb-postbit-stats smalltext">{$rows}</span>
