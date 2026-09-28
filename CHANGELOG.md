@@ -4,6 +4,9 @@ All notable changes to the Logbook plugin are documented here.
 
 ## [Unreleased]
 
+### Changed
+- All stylesheet colours can now be overridden by the theme through `--h4w-*` custom properties (e.g. `--h4w-logbook-accent`, `--h4w-logbook-bg-head`, `--h4w-logbook-warn-bg`). Each variable keeps the previous colour as fallback, so themes without these properties look unchanged.
+
 ## [2.1.0] – 2026-08-27
 
 ### Added
