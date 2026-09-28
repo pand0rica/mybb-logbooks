@@ -1056,6 +1056,13 @@
     --lb-warn-border: var(--h4w-logbook-warn-border, #e8c050);
     --lb-warn-bg:     var(--h4w-logbook-warn-bg, #fffdf0);
     --lb-warn-head:   var(--h4w-logbook-warn-head, #fff8e1);
+    /* Schrift der Erinnerungsleisten – Designs mit schmaler Schrift / dunklem
+       Grund koennen groesser und kontrastreicher stellen */
+    --lb-rem-size:        var(--h4w-logbook-reminder-fontsize, 12px);
+    --lb-rem-size-small:  var(--h4w-logbook-reminder-fontsize-small, 11px);
+    --lb-rem-title-color: var(--h4w-logbook-reminder-title-color, inherit);
+    --lb-rem-label-color: var(--h4w-logbook-reminder-label-color, inherit);
+    --lb-rem-label-opacity: var(--h4w-logbook-reminder-label-opacity, 0.75);
 }
 
 .lb-reminder-widget {
@@ -1068,7 +1075,7 @@
 .lb-reminder-header {
     background: var(--lb-warn-head);
     padding: 7px 10px;
-    font-size: 11px;
+    font-size: var(--lb-rem-size-small);
     font-weight: 600;
     color: var(--lb-warn);
     text-transform: uppercase;
@@ -1083,7 +1090,7 @@
     padding: 7px 10px;
     background: var(--lb-warn-bg);
     border-bottom: 1px solid var(--lb-warn-border);
-    font-size: 12px;
+    font-size: var(--lb-rem-size);
 }
 
 .lb-reminder-bar:last-child {
@@ -1092,6 +1099,7 @@
 
 .lb-reminder-bar-title {
     flex: 1;
+    color: var(--lb-rem-title-color);
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1100,7 +1108,7 @@
 
 .lb-reminder-bar-days {
     color: var(--lb-warn);
-    font-size: 11px;
+    font-size: var(--lb-rem-size-small);
     white-space: nowrap;
     flex-shrink: 0;
 }
@@ -1114,12 +1122,12 @@
 
 .lb-reminder-char-label {
     padding: 4px 10px;
-    font-size: 11px;
+    font-size: var(--lb-rem-size-small);
     font-weight: bold;
     background: var(--lb-warn-head);
     border-top: 1px solid var(--lb-warn-border);
-    color: inherit;
-    opacity: 0.75;
+    color: var(--lb-rem-label-color);
+    opacity: var(--lb-rem-label-opacity);
 }
 
 /* --------------------------------------------------------------------------

@@ -7,6 +7,9 @@ All notable changes to the Logbook plugin are documented here.
 ### Changed
 - All stylesheet colours can now be overridden by the theme through `--h4w-*` custom properties (e.g. `--h4w-logbook-accent`, `--h4w-logbook-bg-head`, `--h4w-logbook-warn-bg`). Each variable keeps the previous colour as fallback, so themes without these properties look unchanged.
 
+### Added
+- Posting reminder bars on the index: text size and colours are themeable via `--h4w-logbook-reminder-fontsize`, `--h4w-logbook-reminder-fontsize-small`, `--h4w-logbook-reminder-title-color`, `--h4w-logbook-reminder-label-color` and `--h4w-logbook-reminder-label-opacity` (defaults: 12px / 11px / inherited colour / 0.75, as before), so dark themes and narrow fonts can stay readable.
+
 ## [2.1.0] – 2026-08-27
 
 ### Added
