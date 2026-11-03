@@ -31,7 +31,7 @@ EnhancedAccountSwitcher and does **not** need to be added manually.
 ## Installation
 
 1. Upload all files to your MyBB root directory, preserving the folder structure.
-2. Go to **ACP → Configuration → Plugins** and activate **Logbook**.
+2. Go to **ACP → Configuration → Plugins** and click **Install & Activate** next to **Logbook**.
 3. Go to **ACP → Configuration → Settings → Logbook** and configure the plugin.
 
 ## Theme Integration
