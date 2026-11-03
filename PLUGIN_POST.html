@@ -1,0 +1,128 @@
+[size=x-large][b]Logbook[/b][/size]
+[i]Version 2.1.0[/i] – Das persönliche Szenen-Logbuch für deine Charaktere: Inplay-Szenen werden beim Erstellen automatisch erfasst, mit Erinnerung, wenn du dran bist.
+
+[size=large][b]Worum geht's?[/b][/size]
+
+Wer mehrere Charaktere spielt, verliert schnell den Überblick: Welche Szenen laufen noch, wo bin ich dran, wann habe ich zuletzt gepostet? Logbook erfasst jede neue Inplay-Szene mit Ort, Inplay-Datum, Tageszeit und Teilnehmenden direkt beim Erstellen des Themas und trägt sie bei allen Beteiligten ein. Auf der Startseite erinnert es dich, wenn du in einer Szene an der Reihe bist, und beendete Szenen wandern auf Wunsch automatisch ins Archiv.
+
+[size=large][b]Highlights[/b][/size]
+
+[list]
+[*] Szenen werden beim Erstellen eines Inplay-Themas automatisch für alle Teilnehmenden erfasst
+[*] Posting-Erinnerung auf der Startseite, wenn du an der Reihe bist
+[*] Übersicht aller aktiven Szenen über alle verknüpften Charaktere, mit Filtern
+[*] Szenenstatistik im Postbit und im Profil
+[*] Automatisches Archivieren, sobald alle eine Szene beendet haben
+[/list]
+
+[size=large][b]Was das Plugin alles kann[/b][/size]
+
+[b]Für Mitglieder[/b]
+[list]
+[*][b]Szenenformular beim neuen Thema[/b] – In Inplay-Foren erscheint unter dem Editor ein Formular für Ort, Inplay-Jahr/-Monat/-Tag, Tageszeit, Szenentyp und Teilnehmende. Die Szene landet sofort im Logbook aller Beteiligten. [i](Neues Thema in einem Inplay-Forum)[/i]
+[*][b]Szeneninfo im Thema[/b] – Über den Beiträgen zeigt eine Box die Szenendaten und die Teilnehmenden; in der Themenliste steht eine kompakte Zeile mit denselben Infos. [i](Thread-Ansicht, Forenansicht)[/i]
+[*][b]Logbook-Übersicht[/b] – Statistik und alle eigenen Szenen. Du bearbeitest Szenendaten, persönliche Notizen und Teilnehmende und markierst Szenen als beendet oder wieder aktiv. [i](logbook.php, Link im Header)[/i]
+[*][b]Meine Szenen[/b] – Alle aktiven Szenen aller verknüpften Charaktere auf einer Seite, filterbar nach Kategorie, Tagen seit dem letzten Beitrag, Inplay-Monat oder „ich bin dran", sortierbar nach letztem Beitrag oder Inplay-Datum. [i](logbook.php?action=my_scenes)[/i]
+[*][b]Logbook als Popup teilen[/b] – Jedes Logbook lässt sich als Popup ansehen, mit eigener Vorlage und Beschreibung. [i](logbook.php?action=popup_view)[/i]
+[*][b]Szenen nachtragen[/b] – Szenen ohne Thema (ungespielt oder geplant, privat oder öffentlich) oder ältere Themen lassen sich von Hand eintragen. Du kannst dich auch selbst zu einer bestehenden Szene hinzufügen. [i](logbook.php)[/i]
+[*][b]Teilnehmende entfernen[/b] – Wurde versehentlich der falsche Charakter eingetragen, entfernst du ihn wieder – erlaubt für den eigenen Account und die damit verknüpften Charaktere. [i](Szene bearbeiten)[/i]
+[*][b]Posting-Erinnerung[/b] – Bist du laut Postreihenfolge dran und ist seit dem letzten Beitrag die eingestellte Zahl an Tagen vergangen, erscheint auf der Startseite eine Erinnerung mit Button zum Thema. Den Schwellwert kannst du pro Charakter und pro Szene anpassen. [i](Startseite)[/i]
+[*][b]Statistik in Postbit und Profil[/b] – Szenen gesamt, aktiv, beendet, überfällig und Inplay-Beiträge, je nach Einstellung. [i](Beiträge, Profil)[/i]
+[/list]
+
+[b]Für Administratoren[/b]
+[list]
+[*][b]Inplay-Foren und Gruppen festlegen[/b] – Nur in ausgewählten Foren erscheint das Szenenformular, nur ausgewählte Gruppen nutzen das Logbook. [i](ACP → Konfiguration → Einstellungen → Logbook)[/i]
+[*][b]Theme-Anbindung[/b] – Beim Aktivieren setzt das Plugin seine Variablen selbst in die Standard-Templates; die Farben lassen sich über CSS-Variablen ans Theme anpassen.
+[/list]
+
+[b]Läuft automatisch[/b]
+[list]
+[*][b]Archivieren[/b] – Haben alle Teilnehmenden eine Szene beendet, wird das Thema ins eingestellte Archivforum verschoben.
+[/list]
+
+[b]Zusammenspiel mit anderen Plugins[/b]
+[list]
+[*][b]Enhanced Account Switcher[/b] – Verknüpft deine Charaktere, sodass „Meine Szenen" und die Erinnerungen alle zusammen zeigen. Ohne das Plugin gilt jeder Account für sich.
+[*][b]MyAlerts[/b] – Wer zu einer Szene hinzugefügt wird, bekommt einen Alert. Ohne MyAlerts entfällt nur die Benachrichtigung.
+[/list]
+
+[size=large][b]So sieht's aus[/b][/size]
+
+[img]https://raw.githubusercontent.com/pand0rica/mybb-logbooks/main/docs/screenshots/scene-form.png[/img]
+[i]Das Szenenformular beim Erstellen eines Themas[/i]
+
+[img]https://raw.githubusercontent.com/pand0rica/mybb-logbooks/main/docs/screenshots/scene-threadview.png[/img]
+[i]Szeneninfo in der Thread-Ansicht[/i]
+
+[img]https://raw.githubusercontent.com/pand0rica/mybb-logbooks/main/docs/screenshots/logbook-cp.png[/img]
+[i]Die Logbook-Übersicht[/i]
+
+[img]https://raw.githubusercontent.com/pand0rica/mybb-logbooks/main/docs/screenshots/my-scenes.png[/img]
+[i]Alle aktiven Szenen mit Filtern[/i]
+
+[img]https://raw.githubusercontent.com/pand0rica/mybb-logbooks/main/docs/screenshots/index_posterinnerung.png[/img]
+[i]Posting-Erinnerung auf der Startseite[/i]
+
+[img]https://raw.githubusercontent.com/pand0rica/mybb-logbooks/main/docs/screenshots/scenes_index.png[/img]
+[i]Szenen-Widget auf der Startseite[/i]
+
+[img]https://raw.githubusercontent.com/pand0rica/mybb-logbooks/main/docs/screenshots/popup-view.png[/img]
+[i]Das Logbook als Popup[/i]
+
+[size=large][b]Einstellungen[/b][/size]
+
+[list]
+[*][b]Inplay-Foren[/b] – In diesen Foren erscheint das Szenenformular. [i](Standard: keine)[/i]
+[*][b]Erlaubte Benutzergruppen[/b] – Diese Gruppen nutzen das Logbook. [i](Standard: keine Auswahl = alle)[/i]
+[*][b]Posting-Erinnerung (Tage)[/b] – Ab so vielen Tagen erscheint die Erinnerung; 0 schaltet sie ab. Pro Charakter und Szene überschreibbar. [i](Standard: 0)[/i]
+[*][b]Archivforum[/b] – Hierhin werden beendete Szenen verschoben. [i](Standard: keins = nicht verschieben)[/i]
+[*][b]Postbit-Statistik[/b] – Welche Werte im Beitrag erscheinen. [i](Standard: gesamt, beendet, Inplay-Beiträge)[/i]
+[*][b]Profil-Statistik[/b] – Welche Werte im Profil erscheinen. [i](Standard: gesamt, aktiv, beendet, Inplay-Beiträge)[/i]
+[/list]
+
+[size=large][b]Voraussetzungen[/b][/size]
+
+[list]
+[*] MyBB 1.8.x
+[*] PHP 7.4 oder 8.x
+[*] Optional: Enhanced Account Switcher, MyAlerts
+[/list]
+
+[size=large][b]Installation[/b][/size]
+
+[list=1]
+[*] Dateien in das MyBB-Stammverzeichnis kopieren (Ordnerstruktur beibehalten)
+[*] ACP → Konfiguration → Plugins → Logbook → Installieren & aktivieren
+[*] ACP → Konfiguration → Einstellungen → Logbook → Inplay-Foren auswählen und weitere Optionen festlegen
+[/list]
+Bei stark angepassten Themes musst du die Variablen eventuell von Hand in die Templates setzen – die README nennt die genauen Stellen.
+
+[size=large][b]Update[/b][/size]
+
+[list=1]
+[*] Neue Dateien hochladen und vorhandene überschreiben
+[*] ACP → Konfiguration → Plugins → Logbook → Deaktivieren und wieder Aktivieren
+[/list]
+Templates und Stylesheet werden neu eingespielt, neue Einstellungen ergänzt. Deine Einstellungen und alle Szenen bleiben erhalten.
+
+[size=large][b]Für die Entwicklung[/b][/size]
+
+[list]
+[*] Öffentliche Funktionen wie [i]logbook_get_user_logbook()[/i] und [i]logbook_get_user_stats()[/i] sowie eigene Hooks wie [i]logbook_scene_created[/i] und [i]logbook_scene_finished_changed[/i]
+[/list]
+
+[size=large][b]Grenzen & Ausblick[/b][/size]
+
+Die Erkennung „du bist dran" richtet sich nach der Postreihenfolge im Thema; Szenen im freien Postingmodus erzeugen keine Erinnerung. Wechselst du nach der Aktivierung auf ein Theme mit eigenen Templates, musst du Logbook einmal deaktivieren und wieder aktivieren.
+
+[size=large][b]Download & Quellcode[/b][/size]
+
+&raquo; [url=https://github.com/pand0rica/mybb-logbooks]GitHub: pand0rica/mybb-logbooks[/url] – Änderungen im [url=https://github.com/pand0rica/mybb-logbooks/blob/main/CHANGELOG.md]Changelog[/url], Lizenz GPL-3.0
+
+[size=large][b]Unterstützung[/b][/size]
+
+<i class="cp cp-tea"></i> Wenn dir das Plugin gefällt, kannst du mir gerne einen Tee spendieren: [url=https://ko-fi.com/pand0rica]ko-fi.com/pand0rica[/url]
+
+[size=small]Fragen, Bugs oder Feature-Wünsche gerne als GitHub Issue melden oder hier im Thread.
+Ich freue mich, wenn ihr mir den Link dalasst, wo das Plugin verwendet wird.[/size]
