@@ -271,13 +271,13 @@ if ($action === '') {
                 $action_cell = '';
                 if (logbook_user_can_manage_uid($current_uid, $p_uid)) {
                     $action_cell = '<form method="post" action="logbook.php" class="lb-inline-form"'
-                                 . ' onsubmit="return confirm(\'' . addslashes($lang->logbook_confirm_remove_participant) . '\');">'
+                                 . ' onsubmit="return confirm(' . htmlspecialchars_uni((string)json_encode($lang->logbook_confirm_remove_participant)) . ');">'
                                  . '<input type="hidden" name="action" value="scene_remove_participant" />'
                                  . '<input type="hidden" name="my_post_key" value="' . $post_key . '" />'
                                  . '<input type="hidden" name="sceneId" value="' . $id . '" />'
                                  . '<input type="hidden" name="targetUid" value="' . $p_uid . '" />'
-                                 . '<button type="submit" class="button lb-action">'
-                                 . $lang->logbook_action_remove_participant . '</button>'
+                                 . '<input type="submit" class="button lb-action" value="'
+                                 . htmlspecialchars_uni($lang->logbook_action_remove_participant) . '" />'
                                  . '</form>';
                 }
 

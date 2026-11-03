@@ -151,13 +151,13 @@ function logbook_activate(): void
             $tid = (int)$theme["tid"];
             $existing = $db->fetch_array($db->simple_select(
                 "themestylesheets", "sid",
-                "name = 'logbook.css' AND tid = '" . $tid . "'"
+                "name = 'logbook.css' AND tid = " . $tid
             ));
             if ($existing) {
                 $db->update_query("themestylesheets", [
                     "stylesheet"   => $css,
                     "lastmodified" => TIME_NOW,
-                ], "sid='" . (int)$existing["sid"] . "'", 1);
+                ], "sid=" . (int)$existing["sid"], 1);
             } else {
                 $sid = $db->insert_query("themestylesheets", [
                     "name"         => "logbook.css",
@@ -169,7 +169,7 @@ function logbook_activate(): void
                 ]);
                 $db->update_query("themestylesheets",
                     ["cachefile" => "css.php?stylesheet={$sid}"],
-                    "sid='{$sid}'", 1
+                    "sid=" . (int)$sid, 1
                 );
             }
             update_theme_stylesheet_list($tid);
@@ -347,7 +347,7 @@ function logbook_inject_template(string $title, string $needle, string $replace,
         }
         $new = str_replace($needle, $replace, $tpl['template']);
         if ($new !== $tpl['template']) {
-            $db->update_query('templates', ['template' => $db->escape_string($new)], "tid = '" . (int)$tpl['tid'] . "'");
+            $db->update_query('templates', ['template' => $db->escape_string($new)], "tid = " . (int)$tpl['tid']);
         }
     }
 }
@@ -372,7 +372,7 @@ function logbook_remove_from_template(string $title, string $remove): void
     while ($tpl = $db->fetch_array($query)) {
         $new = str_replace($remove, '', $tpl['template']);
         if ($new !== $tpl['template']) {
-            $db->update_query('templates', ['template' => $db->escape_string($new)], "tid = '" . (int)$tpl['tid'] . "'");
+            $db->update_query('templates', ['template' => $db->escape_string($new)], "tid = " . (int)$tpl['tid']);
         }
     }
 }

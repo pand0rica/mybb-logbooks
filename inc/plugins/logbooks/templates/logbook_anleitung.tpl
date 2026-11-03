@@ -99,7 +99,7 @@
                             <!-- ═══ 8. Einträge manuell hinzufügen ═══ -->
                             <h3>8 &nbsp;Einträge manuell hinzufügen</h3>
                             Unter <strong>„Einträge hinzufügen"</strong> kannst du Szenen nachtragen, die noch nicht im Logbook erfasst sind. Gib dazu die <strong>Thread-ID</strong> ein – die findest du in der URL des Threads (z.&nbsp;B. <code>…&amp;tid=<strong>123</strong></code>). Du kannst hier auch Szenen ohne Thread (Typ „Unausgespielt" oder „Geplant") eintragen.<br />
-                            Du wirst beim manuellen Eintragen automatisch als erster Teilnehmer gesetzt. Weitere Charaktere lassen sich über „+ Teilnehmende hinzufügen" ergänzen.
+                            Du wirst beim manuellen Eintragen automatisch als erste teilnehmende Person gesetzt. Weitere Charaktere lassen sich über „+ Teilnehmende hinzufügen" ergänzen.
 
                             <!-- ═══ 9. Sich selbst hinzufügen ═══ -->
                             <h3>9 &nbsp;Sich selbst zu einer Szene hinzufügen</h3>
