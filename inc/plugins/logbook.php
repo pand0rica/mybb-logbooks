@@ -42,7 +42,7 @@ function logbook_info(): array
     return [
         "name"          => "Logbook",
         "description"   => "Verwaltet Inplay-Szenen im Logbook der Benutzer.",
-        "website"       => "https://github.com/pand0rica/logbooks",
+        "website"       => "https://github.com/pand0rica/mybb-logbooks",
         "author"        => "pand0rica",
         "authorsite"    => "https://github.com/pand0rica",
         "version"       => "2.1.0",
