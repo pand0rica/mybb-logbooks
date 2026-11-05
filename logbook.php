@@ -13,6 +13,8 @@ define("IN_MYBB", 1);
 define('THIS_SCRIPT', 'logbook.php');
 
 require_once "./global.php";
+// PHP 8: template variable that is not always set
+$multipage = null;
 require_once MYBB_ROOT . "inc/functions_post.php";
 require_once MYBB_ROOT . "inc/functions_user.php";
 // logbook_*()-Funktionen sind über inc/plugins/logbook.php bereits durch global.php geladen.

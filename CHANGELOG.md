@@ -4,6 +4,11 @@ All notable changes to the Logbook plugin are documented here.
 
 ## [Unreleased]
 
+### Fixed
+- **Free-order badge colours.** `.lb-free-order` referenced the undefined `--lb-muted-bg` and always fell back to a near-white background; it now uses the defined slate tokens and follows the theme.
+- **Non-ASCII glyphs in the stylesheet.** The `›` and `✓` pseudo-element contents are written as CSS escapes, so they survive any stylesheet import/encoding.
+- **PHP 8 warning on `logbook.php`.** `$multipage` is initialised before the templates are evaluated.
+
 ### Changed (lifecycle)
 - Settings are created in `logbook_install()` (new idempotent `logbook_install_settings()`);
   `logbook_activate()` only adds settings introduced by later versions and never touches
