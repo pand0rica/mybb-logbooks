@@ -5,6 +5,7 @@ All notable changes to the Logbook plugin are documented here.
 ## [Unreleased]
 
 ### Fixed
+- **UserCP menu icon.** The Logbook row in the UserCP navigation now has an inline SVG icon in the link colour (`currentColor`); rows baked by earlier versions are removed by href and class.
 - **Free-order badge colours.** `.lb-free-order` referenced the undefined `--lb-muted-bg` and always fell back to a near-white background; it now uses the defined slate tokens and follows the theme.
 - **Non-ASCII glyphs in the stylesheet.** The `›` and `✓` pseudo-element contents are written as CSS escapes, so they survive any stylesheet import/encoding.
 - **PHP 8 warning on `logbook.php`.** `$multipage` is initialised before the templates are evaluated.

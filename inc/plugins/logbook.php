@@ -400,7 +400,7 @@ function logbook_remove_from_template(string $title, string $remove): void
  */
 function logbook_usercp_nav_template(): string
 {
-    return '<tr><td class="trow1 smalltext"><a href="logbook.php" class="usercp_nav_item usercp_nav_logbook">{$lang->logbook_usercp_nav_link}</a></td></tr>';
+    return '<tr><td class="trow1 smalltext"><a href="logbook.php" class="usercp_nav_item usercp_nav_logbook" style="padding-left: 0;"><svg class="usercp_nav_icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" aria-hidden="true" style="vertical-align: -3px; margin-right: 6px;"><path d="M2.5 3.5c1.8-.9 3.8-.9 5.5.4 1.7-1.3 3.7-1.3 5.5-.4v9c-1.8-.9-3.8-.9-5.5.4-1.7-1.3-3.7-1.3-5.5-.4z" stroke-width="1.3" stroke-linejoin="round"/><path d="M8 3.9v9" stroke-width="1.3"/></svg>{$lang->logbook_usercp_nav_link}</a></td></tr>';
 }
 
 function logbook_add_usercp_nav_link(): void
@@ -417,7 +417,8 @@ function logbook_remove_usercp_nav_link(): void
 {
     find_replace_templatesets(
         'usercp_nav_misc',
-        '#' . preg_quote("\n" . logbook_usercp_nav_template()) . '#i',
+        // Match by href + class so rows baked by older versions are removed as well.
+        '#\n?<tr><td[^>]*><a href="logbook\.php" class="usercp_nav_item usercp_nav_logbook"[^>]*>.*?</a></td></tr>#i',
         ''
     );
 }
