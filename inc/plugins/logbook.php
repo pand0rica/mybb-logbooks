@@ -96,6 +96,98 @@ function logbook_install(): void
         `title`      VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT NULL,
         PRIMARY KEY (`id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
+
+    logbook_install_settings();
+}
+
+/**
+ * Legt settinggroup und Settings idempotent an: fehlende Settings werden ergänzt,
+ * vorhandene Werte nie überschrieben. Aufgerufen in install() (Erstanlage) und
+ * activate() (Upgrade-Pfad), entfernt in uninstall() (debugging.md #21).
+ */
+function logbook_install_settings(): void
+{
+    global $db;
+
+    // Plugin-Settings anlegen bzw. bei Upgrade fehlende Einzel-Settings ergänzen.
+    // Die settinggroup-Existenz allein darf nicht den ganzen Block überspringen,
+    // sonst fehlen bei Upgrades neu hinzugekommene Settings (z.B. logbook_archive_forum).
+    $setting_defs = [
+        [
+            'name'        => 'logbook_inplay_forums',
+            'title'       => 'In-Play Forums',
+            'description' => 'Select all forums that are treated as in-play forums.',
+            'optionscode' => 'forumselect',
+            'value'       => '',
+            'disporder'   => 1,
+        ],
+        [
+            'name'        => 'logbook_allowed_groups',
+            'title'       => 'Allowed User Groups',
+            'description' => 'Select all user groups that may use the logbook. Select none to allow all groups.',
+            'optionscode' => 'groupselect',
+            'value'       => '',
+            'disporder'   => 2,
+        ],
+        [
+            'name'        => 'logbook_reminder_days',
+            'title'       => 'Posting Reminder (Days)',
+            'description' => 'Global default: show a reminder on the index if the user has not posted in a scene for this many days. 0 = disabled.',
+            'optionscode' => 'text',
+            'value'       => '0',
+            'disporder'   => 3,
+        ],
+        [
+            'name'        => 'logbook_archive_forum',
+            'title'       => 'Archive Forum',
+            'description' => 'Threads whose scene has been finished by all participants are moved to this forum. Select none to disable moving.',
+            'optionscode' => 'forumselect',
+            'value'       => '',
+            'disporder'   => 4,
+        ],
+        [
+            'name'        => 'logbook_postbit_fields',
+            'title'       => 'Postbit Statistics',
+            'description' => 'Select which logbook statistics are shown in each post, in the author column below the post count. Select none to disable.',
+            'optionscode' => "checkbox\ntotal=Total scenes\nactive=Active scenes\nfinished=Finished scenes\noverdue=Overdue scenes\ninplayposts=In-play posts",
+            'value'       => 'total,finished,inplayposts',
+            'disporder'   => 5,
+        ],
+        [
+            'name'        => 'logbook_profile_fields',
+            'title'       => 'Profile Statistics',
+            'description' => 'Select which logbook statistics are shown on the member profile page. Select none to disable.',
+            'optionscode' => "checkbox\ntotal=Total scenes\nactive=Active scenes\nfinished=Finished scenes\noverdue=Overdue scenes\ninplayposts=In-play posts",
+            'value'       => 'total,active,finished,inplayposts',
+            'disporder'   => 6,
+        ],
+    ];
+
+    $group = $db->fetch_array($db->simple_select('settinggroups', 'gid', "name = 'logbook'"));
+    if ($group) {
+        $gid = (int)$group['gid'];
+    } else {
+        $gid = (int)$db->insert_query('settinggroups', [
+            'name'        => 'logbook',
+            'title'       => 'Logbook',
+            'description' => 'Settings for the Logbook plugin.',
+            'disporder'   => 1,
+            'isdefault'   => 0,
+        ]);
+    }
+
+    foreach ($setting_defs as $def) {
+        $exists = $db->fetch_array($db->simple_select(
+            'settings', 'sid', "name = '" . $db->escape_string($def['name']) . "'"
+        ));
+        if ($exists) {
+            continue; // keep existing value on upgrade/reactivation
+        }
+        $def['gid'] = $gid;
+        $db->insert_query('settings', $def);
+    }
+
+    rebuild_settings();
 }
 
 /**
@@ -203,85 +295,9 @@ function logbook_activate(): void
         }
     }
 
-    // Plugin-Settings anlegen bzw. bei Upgrade fehlende Einzel-Settings ergänzen.
-    // Die settinggroup-Existenz allein darf nicht den ganzen Block überspringen,
-    // sonst fehlen bei Upgrades neu hinzugekommene Settings (z.B. logbook_archive_forum).
-    $setting_defs = [
-        [
-            'name'        => 'logbook_inplay_forums',
-            'title'       => 'In-Play Forums',
-            'description' => 'Select all forums that are treated as in-play forums.',
-            'optionscode' => 'forumselect',
-            'value'       => '',
-            'disporder'   => 1,
-        ],
-        [
-            'name'        => 'logbook_allowed_groups',
-            'title'       => 'Allowed User Groups',
-            'description' => 'Select all user groups that may use the logbook. Select none to allow all groups.',
-            'optionscode' => 'groupselect',
-            'value'       => '',
-            'disporder'   => 2,
-        ],
-        [
-            'name'        => 'logbook_reminder_days',
-            'title'       => 'Posting Reminder (Days)',
-            'description' => 'Global default: show a reminder on the index if the user has not posted in a scene for this many days. 0 = disabled.',
-            'optionscode' => 'text',
-            'value'       => '0',
-            'disporder'   => 3,
-        ],
-        [
-            'name'        => 'logbook_archive_forum',
-            'title'       => 'Archive Forum',
-            'description' => 'Threads whose scene has been finished by all participants are moved to this forum. Select none to disable moving.',
-            'optionscode' => 'forumselect',
-            'value'       => '',
-            'disporder'   => 4,
-        ],
-        [
-            'name'        => 'logbook_postbit_fields',
-            'title'       => 'Postbit Statistics',
-            'description' => 'Select which logbook statistics are shown in each post, in the author column below the post count. Select none to disable.',
-            'optionscode' => "checkbox\ntotal=Total scenes\nactive=Active scenes\nfinished=Finished scenes\noverdue=Overdue scenes\ninplayposts=In-play posts",
-            'value'       => 'total,finished,inplayposts',
-            'disporder'   => 5,
-        ],
-        [
-            'name'        => 'logbook_profile_fields',
-            'title'       => 'Profile Statistics',
-            'description' => 'Select which logbook statistics are shown on the member profile page. Select none to disable.',
-            'optionscode' => "checkbox\ntotal=Total scenes\nactive=Active scenes\nfinished=Finished scenes\noverdue=Overdue scenes\ninplayposts=In-play posts",
-            'value'       => 'total,active,finished,inplayposts',
-            'disporder'   => 6,
-        ],
-    ];
-
-    $group = $db->fetch_array($db->simple_select('settinggroups', 'gid', "name = 'logbook'"));
-    if ($group) {
-        $gid = (int)$group['gid'];
-    } else {
-        $gid = (int)$db->insert_query('settinggroups', [
-            'name'        => 'logbook',
-            'title'       => 'Logbook',
-            'description' => 'Settings for the Logbook plugin.',
-            'disporder'   => 1,
-            'isdefault'   => 0,
-        ]);
-    }
-
-    foreach ($setting_defs as $def) {
-        $exists = $db->fetch_array($db->simple_select(
-            'settings', 'sid', "name = '" . $db->escape_string($def['name']) . "'"
-        ));
-        if ($exists) {
-            continue; // keep existing value on upgrade/reactivation
-        }
-        $def['gid'] = $gid;
-        $db->insert_query('settings', $def);
-    }
-
-    rebuild_settings();
+    // Upgrade-Pfad: Settings späterer Versionen nachrüsten, vorhandene Werte bleiben
+    // (Erstanlage in logbook_install(), debugging.md #21).
+    logbook_install_settings();
 
     logbook_install_alert_type();
 

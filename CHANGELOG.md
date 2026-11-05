@@ -4,6 +4,11 @@ All notable changes to the Logbook plugin are documented here.
 
 ## [Unreleased]
 
+### Changed (lifecycle)
+- Settings are created in `logbook_install()` (new idempotent `logbook_install_settings()`);
+  `logbook_activate()` only adds settings introduced by later versions and never touches
+  existing values (dev kit `debugging.md` #21).
+
 ### Fixed (review)
 - **Mixed action buttons.** “Mark finished/active”, the filter button and “Remove
   participant” used `<button>`; the index reminder used `<a class="button">`. All are now
