@@ -18,30 +18,30 @@
 :root {
     /* Table structure – row backgrounds come from MyBB's own trow1/trow2/tcat
        classes, so only the few surfaces the plugin adds itself are defined here. */
-    --lb-border:            var(--h4w-logbook-border, #cdd4dc);                /* outer tborder color */
-    --lb-border-light:      var(--h4w-logbook-border-light, #e4e8ec);                /* inner dividers */
-    --lb-bg:                var(--h4w-surface-0, #FFFFFF);                /* form field background */
-    --lb-bg-head:           var(--h4w-logbook-bg-head, #EEF2F7);                /* subtle card/section header */
-    --lb-bg-subtle:         var(--h4w-logbook-bg-subtle, #eef2f7);                /* card header bg */
+    --lb-border:            #cdd4dc;                /* outer tborder color */
+    --lb-border-light:      #e4e8ec;                /* inner dividers */
+    --lb-bg:                #FFFFFF;                /* form field background */
+    --lb-bg-head:           #EEF2F7;                /* subtle card/section header */
+    --lb-bg-subtle:         #eef2f7;                /* card header bg */
     --lb-shadow:            rgba(0, 0, 0, 0.07);
 
     /* Accent / primary action color */
-    --lb-accent:            var(--h4w-logbook-accent, #0072BC);                /* MyBB link/nav blue */
-    --lb-accent-dark:       var(--h4w-logbook-accent-dark, #2B4468);                /* darker shade */
+    --lb-accent:            #0072BC;                /* MyBB link/nav blue */
+    --lb-accent-dark:       #2B4468;                /* darker shade */
     --lb-accent-subtle:     rgba(54, 86, 128, 0.10);/* focus glow */
 
     /* Text hierarchy */
-    --lb-text:              var(--h4w-text, #333333);
-    --lb-text-secondary:    var(--h4w-logbook-text-secondary, #5A6E82);
-    --lb-text-muted:        var(--h4w-logbook-text-muted, #8a94a0);
+    --lb-text:              #333333;
+    --lb-text-secondary:    #5A6E82;
+    --lb-text-muted:        #8a94a0;
 
     /* Semantic: success (green) */
-    --lb-green:             var(--h4w-logbook-green, #3c9a5f);
+    --lb-green:             #3c9a5f;
     --lb-green-bg:          rgba(60, 154, 95, 0.12);
     --lb-green-border:      rgba(60, 154, 95, 0.35);
 
     /* Semantic: finished/neutral (slate) – its own accent instead of plain grey */
-    --lb-slate:             var(--h4w-logbook-slate, #6b7a8d);
+    --lb-slate:             #6b7a8d;
     --lb-slate-bg:          rgba(107, 122, 141, 0.12);
     --lb-slate-border:      rgba(107, 122, 141, 0.32);
 }
@@ -833,19 +833,19 @@
 
 .lb-badge-au {
     background: rgba(164, 120, 255, 0.12);
-    color: var(--h4w-logbook-badge-au-color, #a478ff);
+    color: #a478ff;
     border: 1px solid rgba(164, 120, 255, 0.30);
 }
 
 .lb-badge-unplayed {
     background: rgba(255, 160, 80, 0.12);
-    color: var(--h4w-logbook-badge-unplayed-color, #e8903a);
+    color: #e8903a;
     border: 1px solid rgba(255, 160, 80, 0.30);
 }
 
 .lb-badge-planned {
     background: rgba(80, 160, 255, 0.12);
-    color: var(--h4w-logbook-badge-planned-color, #4e9aee);
+    color: #4e9aee;
     border: 1px solid rgba(80, 160, 255, 0.30);
 }
 
@@ -1052,17 +1052,17 @@
    Index page – posting reminder bars
    -------------------------------------------------------------------------- */
 :root {
-    --lb-warn:        var(--h4w-logbook-warn, #c07800);
-    --lb-warn-border: var(--h4w-logbook-warn-border, #e8c050);
-    --lb-warn-bg:     var(--h4w-logbook-warn-bg, #fffdf0);
-    --lb-warn-head:   var(--h4w-logbook-warn-head, #fff8e1);
+    --lb-warn:        #c07800;
+    --lb-warn-border: #e8c050;
+    --lb-warn-bg:     #fffdf0;
+    --lb-warn-head:   #fff8e1;
     /* Schrift der Erinnerungsleisten – Designs mit schmaler Schrift / dunklem
        Grund koennen groesser und kontrastreicher stellen */
-    --lb-rem-size:        var(--h4w-logbook-reminder-fontsize, 12px);
-    --lb-rem-size-small:  var(--h4w-logbook-reminder-fontsize-small, 11px);
-    --lb-rem-title-color: var(--h4w-logbook-reminder-title-color, inherit);
-    --lb-rem-label-color: var(--h4w-logbook-reminder-label-color, inherit);
-    --lb-rem-label-opacity: var(--h4w-logbook-reminder-label-opacity, 0.75);
+    --lb-rem-size:        12px;
+    --lb-rem-size-small:  11px;
+    --lb-rem-title-color: inherit;
+    --lb-rem-label-color: inherit;
+    --lb-rem-label-opacity: 0.75;
 }
 
 .lb-reminder-widget {

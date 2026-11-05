@@ -19,6 +19,7 @@ All notable changes to the Logbook plugin are documented here.
 - German texts: “Teilnehmer” → gender-neutral wording.
 
 ### Changed
+- Stylesheet uses plain colour/size values instead of the `--h4w-*` custom properties of one specific forum theme. (Forum-specific theming lives on the separate `h4w` branch.)
 - All stylesheet colours can now be overridden by the theme through `--h4w-*` custom properties (e.g. `--h4w-logbook-accent`, `--h4w-logbook-bg-head`, `--h4w-logbook-warn-bg`). Each variable keeps the previous colour as fallback, so themes without these properties look unchanged.
 
 ### Added
