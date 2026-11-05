@@ -255,7 +255,7 @@
 }
 
 .lb-nav-list li a.lb-nav-link::before {
-    content: "A";
+    content: "\203A";
     display: inline-block;
     margin-right: 6px;
     font-weight: 400;
@@ -563,7 +563,7 @@
 }
 
 .logbook-notice.success::before {
-    content: "¹3";
+    content: "\2713";
     color: var(--lb-green);
     font-weight: 700;
 }
