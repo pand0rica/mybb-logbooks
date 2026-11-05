@@ -42,7 +42,7 @@ function logbook_info(): array
     return [
         "name"          => "Logbook",
         "description"   => "Verwaltet Inplay-Szenen im Logbook der Benutzer.",
-        "website"       => "https://github.com/pand0rica/logbooks",
+        "website"       => "https://github.com/pand0rica/mybb-logbooks",
         "author"        => "pand0rica",
         "authorsite"    => "https://github.com/pand0rica",
         "version"       => "2.1.0",
@@ -96,112 +96,18 @@ function logbook_install(): void
         `title`      VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT NULL,
         PRIMARY KEY (`id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
+
+    logbook_install_settings();
 }
 
 /**
- * Prüft, ob das Plugin bereits installiert ist.
- *
- * @return bool true wenn installiert
+ * Legt settinggroup und Settings idempotent an: fehlende Settings werden ergänzt,
+ * vorhandene Werte nie überschrieben. Aufgerufen in install() (Erstanlage) und
+ * activate() (Upgrade-Pfad), entfernt in uninstall() (debugging.md #21).
  */
-function logbook_is_installed(): bool
+function logbook_install_settings(): void
 {
     global $db;
-    return $db->table_exists("scene");
-}
-
-/**
- * Entfernt alle Plugin-Tabellen bei der Deinstallation.
- *
- * @return void
- */
-function logbook_uninstall(): void
-{
-    global $db;
-
-    // Settings persist across deactivation and are only removed on a full
-    // uninstall (mirrors logbook_activate()).
-    $db->delete_query('settings', "name IN ('logbook_inplay_forums','logbook_allowed_groups','logbook_reminder_days','logbook_archive_forum','logbook_postbit_fields','logbook_profile_fields')");
-    $db->delete_query('settinggroups', "name = 'logbook'");
-    rebuild_settings();
-
-    $db->drop_table("logbook_entry");
-    $db->drop_table("logbook");
-    $db->drop_table("scene");
-}
-
-/**
- * Aktiviert das Plugin: Templates laden, Frontend-Datei kopieren,
- * Plugin-Settings anlegen, Core-Templates modifizieren.
- *
- * @return void
- */
-function logbook_activate(): void
-{
-    global $db;
-
-    require_once MYBB_ROOT . "inc/adminfunctions_templates.php";
-    require_once MYBB_ADMIN_DIR . "inc/functions_themes.php";
-
-    // Register stylesheet in MyBB theme system for all themes
-    $css_path = MYBB_ROOT . "inc/plugins/logbooks/assets/logbook.css";
-    if (file_exists($css_path)) {
-        $css = $db->escape_string((string)file_get_contents($css_path));
-        $themes = $db->simple_select("themes", "tid");
-        while ($theme = $db->fetch_array($themes)) {
-            $tid = (int)$theme["tid"];
-            $existing = $db->fetch_array($db->simple_select(
-                "themestylesheets", "sid",
-                "name = 'logbook.css' AND tid = '" . $tid . "'"
-            ));
-            if ($existing) {
-                $db->update_query("themestylesheets", [
-                    "stylesheet"   => $css,
-                    "lastmodified" => TIME_NOW,
-                ], "sid='" . (int)$existing["sid"] . "'", 1);
-            } else {
-                $sid = $db->insert_query("themestylesheets", [
-                    "name"         => "logbook.css",
-                    "tid"          => $tid,
-                    "attachedto"   => "",
-                    "stylesheet"   => $css,
-                    "lastmodified" => TIME_NOW,
-                    "cachefile"    => "logbook.css",
-                ]);
-                $db->update_query("themestylesheets",
-                    ["cachefile" => "css.php?stylesheet={$sid}"],
-                    "sid='{$sid}'", 1
-                );
-            }
-            update_theme_stylesheet_list($tid);
-        }
-    }
-
-    // Plugin-Templates aus .tpl-Dateien in die DB laden.
-    // Vorher bereinigen, damit ein erneuter Aktivierungslauf (z.B. nach einem
-    // abgebrochenen Aktivieren) keine doppelten logbook_*-Templates anlegt.
-    $db->delete_query('templates', "title LIKE 'logbook%'");
-
-    $template_dir = MYBB_ROOT . "inc/plugins/logbooks/templates/";
-    if (is_dir($template_dir)) {
-        $handle = opendir($template_dir);
-        if ($handle) {
-            while (($file = readdir($handle)) !== false) {
-                if (substr($file, -4) !== '.tpl') {
-                    continue;
-                }
-                $title    = substr($file, 0, -4);
-                $content  = (string)file_get_contents($template_dir . $file);
-                $db->insert_query('templates', [
-                    'title'    => $db->escape_string($title),
-                    'template' => $db->escape_string($content),
-                    'sid'      => -1,
-                    'version'  => '',
-                    'dateline' => time(),
-                ]);
-            }
-            closedir($handle);
-        }
-    }
 
     // Plugin-Settings anlegen bzw. bei Upgrade fehlende Einzel-Settings ergänzen.
     // Die settinggroup-Existenz allein darf nicht den ganzen Block überspringen,
@@ -282,6 +188,116 @@ function logbook_activate(): void
     }
 
     rebuild_settings();
+}
+
+/**
+ * Prüft, ob das Plugin bereits installiert ist.
+ *
+ * @return bool true wenn installiert
+ */
+function logbook_is_installed(): bool
+{
+    global $db;
+    return $db->table_exists("scene");
+}
+
+/**
+ * Entfernt alle Plugin-Tabellen bei der Deinstallation.
+ *
+ * @return void
+ */
+function logbook_uninstall(): void
+{
+    global $db;
+
+    // Settings persist across deactivation and are only removed on a full
+    // uninstall (mirrors logbook_activate()).
+    $db->delete_query('settings', "name IN ('logbook_inplay_forums','logbook_allowed_groups','logbook_reminder_days','logbook_archive_forum','logbook_postbit_fields','logbook_profile_fields')");
+    $db->delete_query('settinggroups', "name = 'logbook'");
+    rebuild_settings();
+
+    $db->drop_table("logbook_entry");
+    $db->drop_table("logbook");
+    $db->drop_table("scene");
+}
+
+/**
+ * Aktiviert das Plugin: Templates laden, Frontend-Datei kopieren,
+ * Plugin-Settings anlegen, Core-Templates modifizieren.
+ *
+ * @return void
+ */
+function logbook_activate(): void
+{
+    global $db;
+
+    require_once MYBB_ROOT . "inc/adminfunctions_templates.php";
+    require_once MYBB_ADMIN_DIR . "inc/functions_themes.php";
+
+    // Register stylesheet in MyBB theme system for all themes
+    $css_path = MYBB_ROOT . "inc/plugins/logbooks/assets/logbook.css";
+    if (file_exists($css_path)) {
+        $css = $db->escape_string((string)file_get_contents($css_path));
+        $themes = $db->simple_select("themes", "tid");
+        while ($theme = $db->fetch_array($themes)) {
+            $tid = (int)$theme["tid"];
+            $existing = $db->fetch_array($db->simple_select(
+                "themestylesheets", "sid",
+                "name = 'logbook.css' AND tid = " . $tid
+            ));
+            if ($existing) {
+                $db->update_query("themestylesheets", [
+                    "stylesheet"   => $css,
+                    "lastmodified" => TIME_NOW,
+                ], "sid=" . (int)$existing["sid"], 1);
+            } else {
+                $sid = $db->insert_query("themestylesheets", [
+                    "name"         => "logbook.css",
+                    "tid"          => $tid,
+                    "attachedto"   => "",
+                    "stylesheet"   => $css,
+                    "lastmodified" => TIME_NOW,
+                    "cachefile"    => "logbook.css",
+                ]);
+                $db->update_query("themestylesheets",
+                    ["cachefile" => "css.php?stylesheet={$sid}"],
+                    "sid=" . (int)$sid, 1
+                );
+            }
+            update_theme_stylesheet_list($tid);
+        }
+    }
+
+    // Plugin-Templates aus .tpl-Dateien in die DB laden.
+    // Vorher bereinigen, damit ein erneuter Aktivierungslauf (z.B. nach einem
+    // abgebrochenen Aktivieren) keine doppelten logbook_*-Templates anlegt.
+    $db->delete_query('templates', "title LIKE 'logbook%'");
+
+    $template_dir = MYBB_ROOT . "inc/plugins/logbooks/templates/";
+    if (is_dir($template_dir)) {
+        $handle = opendir($template_dir);
+        if ($handle) {
+            while (($file = readdir($handle)) !== false) {
+                if (substr($file, -4) !== '.tpl') {
+                    continue;
+                }
+                $title    = substr($file, 0, -4);
+                $content  = (string)file_get_contents($template_dir . $file);
+                $db->insert_query('templates', [
+                    'title'    => $db->escape_string($title),
+                    'template' => $db->escape_string($content),
+                    'sid'      => -1,
+                    'version'  => '',
+                    'dateline' => time(),
+                ]);
+            }
+            closedir($handle);
+        }
+    }
+
+    // Upgrade-Pfad: Settings späterer Versionen nachrüsten, vorhandene Werte bleiben
+    // (Erstanlage in logbook_install(), debugging.md #21).
+    logbook_install_settings();
 
     logbook_install_alert_type();
 
@@ -347,7 +363,7 @@ function logbook_inject_template(string $title, string $needle, string $replace,
         }
         $new = str_replace($needle, $replace, $tpl['template']);
         if ($new !== $tpl['template']) {
-            $db->update_query('templates', ['template' => $db->escape_string($new)], "tid = '" . (int)$tpl['tid'] . "'");
+            $db->update_query('templates', ['template' => $db->escape_string($new)], "tid = " . (int)$tpl['tid']);
         }
     }
 }
@@ -372,7 +388,7 @@ function logbook_remove_from_template(string $title, string $remove): void
     while ($tpl = $db->fetch_array($query)) {
         $new = str_replace($remove, '', $tpl['template']);
         if ($new !== $tpl['template']) {
-            $db->update_query('templates', ['template' => $db->escape_string($new)], "tid = '" . (int)$tpl['tid'] . "'");
+            $db->update_query('templates', ['template' => $db->escape_string($new)], "tid = " . (int)$tpl['tid']);
         }
     }
 }

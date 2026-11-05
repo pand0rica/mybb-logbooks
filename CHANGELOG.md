@@ -4,6 +4,20 @@ All notable changes to the Logbook plugin are documented here.
 
 ## [Unreleased]
 
+### Changed (lifecycle)
+- Settings are created in `logbook_install()` (new idempotent `logbook_install_settings()`);
+  `logbook_activate()` only adds settings introduced by later versions and never touches
+  existing values (dev kit `debugging.md` #21).
+
+### Fixed (review)
+- **Mixed action buttons.** “Mark finished/active”, the filter button and “Remove
+  participant” used `<button>`; the index reminder used `<a class="button">`. All are now
+  `<input type="submit" class="button">` (the reminder via a GET form).
+- The participant removal confirm text is built with `json_encode()` instead of
+  `addslashes()`.
+- Integer columns (`tid`, `sid`) in stylesheet/template queries are no longer quoted.
+- German texts: “Teilnehmer” → gender-neutral wording.
+
 ### Changed
 - All stylesheet colours can now be overridden by the theme through `--h4w-*` custom properties (e.g. `--h4w-logbook-accent`, `--h4w-logbook-bg-head`, `--h4w-logbook-warn-bg`). Each variable keeps the previous colour as fallback, so themes without these properties look unchanged.
 

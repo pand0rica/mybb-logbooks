@@ -2,5 +2,5 @@
     <input type="hidden" name="action" value="scene_change_finished" />
     <input type="hidden" name="scene_id" value="{$scene_id}" />
     <input type="hidden" name="my_post_key" value="{$post_key}" />
-    <button type="submit" class="button lb-action" title="{$lang->logbook_tooltip_mark_finish}">{$lang->logbook_action_mark_finish}</button>
+    <input type="submit" class="button lb-action" title="{$lang->logbook_tooltip_mark_finish}" value="{$lang->logbook_action_mark_finish}" />
 </form>

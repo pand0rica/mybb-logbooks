@@ -51,7 +51,7 @@ $l['logbook_page_pending']              = "Logbook – Noch nicht übernommene S
 $l['logbook_page_add_scene']            = "Logbook – Szene hinzufügen";
 $l['logbook_page_edit_scene']           = "Logbook – Szene bearbeiten";
 $l['logbook_page_edit_entry']           = "Logbook – Persönlicher Eintrag";
-$l['logbook_page_participants']         = "Logbook – Teilnehmer verwalten";
+$l['logbook_page_participants']         = "Logbook – Teilnehmende verwalten";
 $l['logbook_page_add_self']             = "Logbook – Selbst zu einer Szene hinzufügen";
 $l['logbook_page_config']               = "Logbook CP – Konfiguration";
 $l['logbook_page_guide']                = "Logbook CP – Anleitung";
@@ -67,7 +67,7 @@ $l['logbook_col_action']                = "Aktion";
 $l['logbook_col_next_up']               = "Dran";
 $l['logbook_col_lastpost']              = "Letzter Beitrag";
 $l['logbook_you_are_next']              = "Du bist dran";
-$l['logbook_solo_participant']          = "nur 1 Teilnehmer";
+$l['logbook_solo_participant']          = "nur 1 teilnehmende Person";
 $l['logbook_lastpost_by']               = "von";
 
 // === Formularfelder ===
@@ -105,7 +105,7 @@ $l['logbook_btn_add']                   = "Hinzufügen";
 $l['logbook_action_edit']               = "&#9998; Bearbeiten";
 $l['logbook_action_delete']             = "&#10005; Löschen";
 $l['logbook_action_remove_participant'] = "&#10005; Entfernen";
-$l['logbook_confirm_remove_participant'] = "Diesen Teilnehmer wirklich aus der Szene entfernen?";
+$l['logbook_confirm_remove_participant'] = "Diese Person wirklich aus der Szene entfernen?";
 $l['logbook_action_mark_active']        = "&#8635; aktivieren";
 $l['logbook_action_mark_finish']        = "&#10003; beenden";
 $l['logbook_tooltip_accept']            = "Übernehmen";

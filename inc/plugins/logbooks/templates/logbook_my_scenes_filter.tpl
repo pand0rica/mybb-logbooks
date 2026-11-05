@@ -37,7 +37,7 @@
                 </label>
             </div>
             <div class="lb-filter-row lb-filter-actions">
-                <button type="submit" class="button lb-filter-btn">{$lang->logbook_filter_apply}</button>
+                <input type="submit" class="button lb-filter-btn" value="{$lang->logbook_filter_apply}" />
                 <a href="logbook.php?action=my_scenes{$filter_reset_suffix}" class="lb-filter-reset">{$lang->logbook_filter_reset}</a>
             </div>
         </div>

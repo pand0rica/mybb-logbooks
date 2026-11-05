@@ -22,10 +22,10 @@ automatisch erfasst.
 - `logbook_postbit_fields` – checkbox: welche Statistik-Felder im Postbit erscheinen (total,active,finished,overdue,inplayposts); leer = aus
 - `logbook_profile_fields` – checkbox: welche Statistik-Felder im Profil erscheinen (gleiche Optionen); leer = aus
 
-Settings werden in `logbook_activate()` angelegt. Sie **bleiben** bei Deaktivierung erhalten
-(damit die Konfiguration ein Reaktivieren übersteht) und werden erst in `logbook_uninstall()`
-entfernt. `logbook_activate()` legt die settinggroup nur an, wenn sie noch nicht existiert, und
-ergänzt im Else-Zweig fehlende Einzel-Settings (Upgrade-Pfad).
+Settings werden in `logbook_install()` über `logbook_install_settings()` angelegt. Sie
+**bleiben** bei Deaktivierung erhalten und werden erst in `logbook_uninstall()` entfernt.
+`logbook_activate()` ruft dieselbe idempotente Funktion erneut auf und ergänzt nur Settings,
+die eine spätere Version neu einführt (Upgrade-Pfad, Dev-Kit `debugging.md` #21).
 
 ### Benutzerdefinierte DB-Spalten
 Keine custom Spalten mehr nötig (außer was andere Plugins hinzufügen).
