@@ -405,12 +405,9 @@ function logbook_usercp_nav_template(): string
 
 function logbook_add_usercp_nav_link(): void
 {
-    $drafts_link = '<tr><td class="trow1 smalltext"><a href="usercp.php?action=drafts" class="usercp_nav_item usercp_nav_drafts">{$draftcount}</a></td></tr>';
-    find_replace_templatesets(
-        'usercp_nav_misc',
-        '#' . preg_quote($drafts_link) . '#i',
-        $drafts_link . "\n" . logbook_usercp_nav_template()
-    );
+    // h4w: the menu row lives in the RPG category templates (usercp_nav_rpg_*), not in usercp_nav_misc.
+    // Only clean up rows baked into usercp_nav_misc by earlier versions.
+    logbook_remove_usercp_nav_link();
 }
 
 function logbook_remove_usercp_nav_link(): void
