@@ -2130,7 +2130,7 @@ function logbook_get_effective_reminder_days(
 /**
  * Gibt alle aktiven Szenen zurück, in denen der Benutzer dran ist und seit mindestens
  * X Tagen kein Post im Thread gemacht wurde (Posting-Erinnerung).
- * Free-Order-Szenen werden übersprungen (kein fester Zug).
+ * Free-Order-Szenen und Solo-Szenen (nur noch ein aktiver Teilnehmer) werden übersprungen.
  *
  * @param int $uid Benutzer-ID
  * @return array Jeder Eintrag: scene_id, tid, scene_subject, days_since_post
@@ -2183,6 +2183,12 @@ function logbook_db_get_overdue_reminder_scenes(int $uid): array
 
         // Free-order scenes have no fixed turn, skip them
         if (!empty($row['free_order'])) {
+            continue;
+        }
+
+        // Solo scenes (only this user left, e.g. partner finished or account
+        // deleted) have nobody waiting, so there is no turn to remind about
+        if (logbook_scene_count_active_participants((int)$row['scene_id']) <= 1) {
             continue;
         }
 
