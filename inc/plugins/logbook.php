@@ -1044,6 +1044,7 @@ function logbook_db_get_scenes(int $logbook_id): array
         LEFT JOIN " . TABLE_PREFIX . "threads t ON t.tid = s.tid
         WHERE e.finished = 0
           AND s.scene_type IN (0, 1)
+          AND (s.tid = 0 OR (t.tid IS NOT NULL AND t.visible <> -2))
           AND logbook_id = " . $logbook_id . "
     ");
 
@@ -1478,6 +1479,21 @@ function logbook_is_thread_inplay(int $tid): bool
     }
 
     return false;
+}
+
+/**
+ * Checks whether a thread is an unpublished draft (threads.visible = -2).
+ *
+ * @param int $tid Thread ID
+ * @return bool
+ */
+function logbook_is_thread_draft(int $tid): bool
+{
+    global $db;
+
+    $row = $db->fetch_array($db->simple_select('threads', 'visible', 'tid = ' . $tid));
+
+    return $row && (int)$row['visible'] === -2;
 }
 
 /**
@@ -2160,6 +2176,8 @@ function logbook_db_get_overdue_reminder_scenes(int $uid): array
           AND e.finished = 0
           AND s.scene_type IN (0, 1)
           AND s.tid > 0
+          AND t.tid IS NOT NULL
+          AND t.visible <> -2
         GROUP BY s.id, s.tid, s.free_order, t.subject, s.title, e.id, e.reminder_days, l.reminder_days, t.dateline
     ");
 
@@ -2749,6 +2767,19 @@ function logbook_handle_do_new_thread(): void
     global $tid, $mybb;
 
     if (!logbook_is_thread_inplay((int)$tid) || !logbook_user_can_use()) {
+        return;
+    }
+
+    // Drafts (threads.visible = -2) are not scenes yet: this hook also fires
+    // when the form is saved as draft. The scene is created once the draft is
+    // published (same tid, visible <> -2).
+    if (logbook_is_thread_draft((int)$tid)) {
+        return;
+    }
+
+    // Never create a second scene for the same thread (e.g. leftovers from
+    // earlier draft saves).
+    if (logbook_db_get_scene_by_tid((int)$tid)) {
         return;
     }
 
