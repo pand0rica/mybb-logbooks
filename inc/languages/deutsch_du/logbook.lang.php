@@ -220,3 +220,6 @@ $l['logbook_form_reminder_days_scene_hint'] = "0 = Charakter-Einstellung verwend
 // === MyAlerts ===
 $l['myalerts_setting_logbook_scene_invite'] = "Szeneneinladungen";
 $l['logbook_alert_scene_invite']            = "Für dich wurde eine neue Szene eröffnet: {1}";
+
+// === rpgcalendar integration ===
+$l['logbook_calendar_name'] = "Meine Szenen";

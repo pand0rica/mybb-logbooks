@@ -17,6 +17,7 @@ When a user creates a new thread in an in-play forum, they fill in scene metadat
 |--------|---------|
 | [EnhancedAccountSwitcher](https://github.com/jnschrag/EnhancedAccountSwitcher) | Links character accounts together; enables multi-character scene overview and reminders |
 | [MyAlerts](https://github.com/MyBBStuff/MyAlerts) | Sends in-forum notifications when a user is added to a scene |
+| rpgcalendar | Shows your scenes (by in-game date) in the in-game calendar, see "Scenes in the In-Game Calendar" |
 
 All optional features are automatically disabled if the respective plugin is not installed.
 
@@ -146,6 +147,16 @@ You can only remove your own account and accounts linked to yours via EnhancedAc
 | **Planned** | Scene that is planned for the future (no thread required) |
 
 Unplayed and Planned scenes can be set to private (visible only to you) or public.
+
+### Scenes in the In-Game Calendar
+
+If the **rpgcalendar** plugin is installed, the Logbook delivers your scenes to it automatically. No configuration is needed.
+
+- Scenes appear on their in-game day (`year`/`month`/`day` of the scene). Scenes without a complete date are not shown.
+- **Normal** scenes and **Planned** scenes are shown; **AU** and **Unplayed** scenes are not part of the in-game timeline and are skipped.
+- A character account sees only its own scenes. A main account (EnhancedAccountSwitcher) sees the scenes of the main account and all linked characters.
+- Scenes in forums or threads you cannot view are never shown.
+- Colour and visibility: **rpgcalendar → My calendars → My scenes**.
 
 ### Posting Reminder
 
