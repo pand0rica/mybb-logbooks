@@ -27,6 +27,9 @@ $plugins->add_hook("usercp_menu",                 "logbook_usercp_nav");
 $plugins->add_hook("global_intermediate",         "logbook_handle_header_link");
 $plugins->add_hook("postbit",                     "logbook_handle_postbit");
 $plugins->add_hook("member_profile_end",          "logbook_handle_profile");
+// Optional rpgcalendar integration (hooks are fired by rpgcalendar only)
+$plugins->add_hook("rpgcalendar_collect_events",    "logbook_hook_rpgcalendar_events");
+$plugins->add_hook("rpgcalendar_collect_calendars", "logbook_hook_rpgcalendar_calendars");
 
 // =============================================================================
 // Plugin-Lifecycle
@@ -1041,6 +1044,7 @@ function logbook_db_get_scenes(int $logbook_id): array
         LEFT JOIN " . TABLE_PREFIX . "threads t ON t.tid = s.tid
         WHERE e.finished = 0
           AND s.scene_type IN (0, 1)
+          AND (s.tid = 0 OR (t.tid IS NOT NULL AND t.visible <> -2))
           AND logbook_id = " . $logbook_id . "
     ");
 
@@ -1475,6 +1479,21 @@ function logbook_is_thread_inplay(int $tid): bool
     }
 
     return false;
+}
+
+/**
+ * Checks whether a thread is an unpublished draft (threads.visible = -2).
+ *
+ * @param int $tid Thread ID
+ * @return bool
+ */
+function logbook_is_thread_draft(int $tid): bool
+{
+    global $db;
+
+    $row = $db->fetch_array($db->simple_select('threads', 'visible', 'tid = ' . $tid));
+
+    return $row && (int)$row['visible'] === -2;
 }
 
 /**
@@ -2157,6 +2176,8 @@ function logbook_db_get_overdue_reminder_scenes(int $uid): array
           AND e.finished = 0
           AND s.scene_type IN (0, 1)
           AND s.tid > 0
+          AND t.tid IS NOT NULL
+          AND t.visible <> -2
         GROUP BY s.id, s.tid, s.free_order, t.subject, s.title, e.id, e.reminder_days, l.reminder_days, t.dateline
     ");
 
@@ -2749,6 +2770,19 @@ function logbook_handle_do_new_thread(): void
         return;
     }
 
+    // Drafts (threads.visible = -2) are not scenes yet: this hook also fires
+    // when the form is saved as draft. The scene is created once the draft is
+    // published (same tid, visible <> -2).
+    if (logbook_is_thread_draft((int)$tid)) {
+        return;
+    }
+
+    // Never create a second scene for the same thread (e.g. leftovers from
+    // earlier draft saves).
+    if (logbook_db_get_scene_by_tid((int)$tid)) {
+        return;
+    }
+
     $scene_data = [
         'tid'        => (int)$tid,
         'ort'        => $mybb->get_input('ort'),
@@ -2973,6 +3007,29 @@ function logbook_uninstall_alert_type(): void
 
     $alertTypeManager = MybbStuff_MyAlerts_AlertTypeManager::createInstance($db, $cache);
     $alertTypeManager->deleteByCode('logbook_scene_invite');
+}
+
+/**
+ * Hook: rpgcalendar_collect_events – delivers the viewer's scenes to rpgcalendar.
+ * The provider file is loaded lazily, only when rpgcalendar actually fires the hook.
+ *
+ * @param array $args Hook arguments (year, month, events by reference)
+ */
+function logbook_hook_rpgcalendar_events(array &$args): void
+{
+    require_once MYBB_ROOT . 'inc/plugins/logbooks/calendar_provider.php';
+    logbook_rpgcalendar_collect($args);
+}
+
+/**
+ * Hook: rpgcalendar_collect_calendars – exposes the "scenes" sub-calendar.
+ *
+ * @param array $args Hook arguments (calendars by reference)
+ */
+function logbook_hook_rpgcalendar_calendars(array &$args): void
+{
+    require_once MYBB_ROOT . 'inc/plugins/logbooks/calendar_provider.php';
+    logbook_rpgcalendar_calendars($args);
 }
 
 /**

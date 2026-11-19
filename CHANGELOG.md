@@ -4,6 +4,9 @@ All notable changes to the Logbook plugin are documented here.
 
 ## [Unreleased]
 
+### Added
+- **rpgcalendar integration.** The Logbook delivers the viewer's scenes (normal and planned, by in-game date) to the rpgcalendar provider hooks `rpgcalendar_collect_events` / `rpgcalendar_collect_calendars` and exposes the sub-calendar "My scenes". Main accounts see the scenes of all linked characters; forum permissions are respected. The provider file is loaded lazily, so nothing changes without rpgcalendar.
+
 ### Fixed
 - **UserCP menu icon.** The Logbook row in the UserCP navigation now has an inline SVG icon in the link colour (`currentColor`); rows baked by earlier versions are removed by href and class.
 - **Free-order badge colours.** `.lb-free-order` referenced the undefined `--lb-muted-bg` and always fell back to a near-white background; it now uses the defined slate tokens and follows the theme.

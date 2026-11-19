@@ -68,6 +68,7 @@ Kein Klassen-Layer mehr – alle Funktionen sind prozedural mit `logbook_`-Präf
 | `global_intermediate` | `logbook_handle_header_link()` – Logbook-Link in Header-Navigation |
 | `postbit` | `logbook_handle_postbit()` – Szenen-Statistik in der Autorenspalte jedes Beitrags |
 | `member_profile_end` | `logbook_handle_profile()` – Szenen-Statistik-Block im Profil |
+| `rpgcalendar_collect_events` / `rpgcalendar_collect_calendars` | `logbook_hook_rpgcalendar_*()` – lädt lazy `logbooks/calendar_provider.php` und liefert Szenen (Typ 0/3) an rpgcalendar; Sub-Kalender-Key `logbook-scenes` |
 
 ## Commit-Konventionen
 - Englische Commit-Messages
