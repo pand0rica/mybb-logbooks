@@ -98,21 +98,32 @@ function logbook_db_get_scenes_in_month(int $year, int $month, array $uids): arr
     }
 
     $query = $db->query("
-        SELECT DISTINCT s.id, s.tid, s.tag, s.`time` AS scene_time, s.ort, s.scene_type, s.title, t.subject
+        SELECT s.id, s.tid, s.tag, s.`time` AS scene_time, s.ort, s.scene_type, s.title, t.subject,
+               l.user_id AS participant_uid, e.finished AS participant_finished, u.username AS participant_name
         FROM " . TABLE_PREFIX . "scene s
         INNER JOIN " . TABLE_PREFIX . "logbook_entry e ON e.scene_id = s.id
         INNER JOIN " . TABLE_PREFIX . "logbook l ON l.id = e.logbook_id
+        LEFT JOIN " . TABLE_PREFIX . "users u ON u.uid = l.user_id
         LEFT JOIN " . TABLE_PREFIX . "threads t ON t.tid = s.tid
         WHERE " . $where . "
-        ORDER BY s.tag ASC, s.id ASC
+        ORDER BY s.tag ASC, s.id ASC, u.username ASC
     ");
 
+    // One row per scene; the viewer's participating accounts are collected in 'participants'
     $rows = [];
     while ($row = $db->fetch_array($query)) {
-        $rows[] = $row;
+        $id = (int)$row['id'];
+        if (!isset($rows[$id])) {
+            $row['participants'] = [];
+            $rows[$id]           = $row;
+        }
+        $rows[$id]['participants'][(int)$row['participant_uid']] = [
+            'name' => (string)$row['participant_name'],
+            'done' => (int)$row['participant_finished'] === 1,
+        ];
     }
 
-    return $rows;
+    return array_values($rows);
 }
 
 /**
@@ -165,6 +176,8 @@ function logbook_rpgcalendar_collect(array &$args): void
             'end'           => ['y' => $year, 'm' => $month, 'd' => $day],
             'important'     => false,
             'badge'         => $planned ? 'scene-planned' : 'scene',
+            // Which of the viewer's characters is in the scene + finished state
+            'participants'  => array_values($scene['participants']),
             'calendar_key'  => LOGBOOK_CALENDAR_KEY,
             'default_color' => LOGBOOK_CALENDAR_COLOR,
         ];
