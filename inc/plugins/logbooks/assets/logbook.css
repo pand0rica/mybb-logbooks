@@ -817,36 +817,53 @@
 }
 
 /* "Post collected" marker – replaces the turn badge while a finished post waits
-   to be published; the toggle below it is deliberately small and link-like. */
+   to be published; the toggle below it is deliberately tiny and link-like.
+   The selectors are specific on purpose: themes style input[type=submit]
+   (border, background, width) and would otherwise turn it into a big button. */
 .lb-collected {
     display: inline-block;
     padding: 2px 8px;
-    background: var(--lb-accent-subtle);
-    color: var(--lb-accent);
-    border: 1px solid var(--lb-accent);
+    background: var(--lb-slate-bg);
+    color: var(--lb-text-secondary);
+    border: 1px solid var(--lb-slate-border);
     border-radius: 2px;
     font-size: 11px;
     font-weight: 600;
     white-space: nowrap;
 }
 
-.lb-collect-form {
+form.lb-collect-form {
     display: block;
-    margin-top: 3px;
+    margin: 2px 0 0;
+    padding: 0;
 }
 
-.lb-collect-btn {
+form.lb-collect-form input.lb-collect-btn[type="submit"] {
+    -webkit-appearance: none;
+    appearance: none;
+    display: inline;
+    width: auto;
+    height: auto;
+    margin: 0;
     padding: 0;
     background: none;
     border: 0;
+    border-radius: 0;
+    box-shadow: none;
     color: var(--lb-text-muted);
+    font: inherit;
     font-size: 10px;
-    text-decoration: underline;
+    line-height: 1.2;
+    text-decoration: none;
+    text-shadow: none;
     cursor: pointer;
 }
 
-.lb-collect-btn:hover {
+form.lb-collect-form input.lb-collect-btn[type="submit"]:hover,
+form.lb-collect-form input.lb-collect-btn[type="submit"]:focus {
+    background: none;
     color: var(--lb-accent);
+    text-decoration: underline;
 }
 
 /* Scene type badges (AU / Unplayed / Planned) */
