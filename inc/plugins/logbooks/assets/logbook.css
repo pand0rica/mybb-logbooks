@@ -832,9 +832,20 @@
     white-space: nowrap;
 }
 
+.lb-scene-titlerow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 8px;
+}
+
+.lb-collect-wrap {
+    margin-left: auto;
+}
+
 form.lb-collect-form {
-    display: block;
-    margin: 2px 0 0;
+    display: inline;
+    margin: 0;
     padding: 0;
 }
 
@@ -850,11 +861,11 @@ form.lb-collect-form input.lb-collect-btn[type="submit"] {
     border: 0;
     border-radius: 0;
     box-shadow: none;
-    color: var(--lb-text-muted);
+    color: var(--lb-accent);
     font: inherit;
-    font-size: 10px;
+    font-size: 11px;
     line-height: 1.2;
-    text-decoration: none;
+    text-decoration: underline;
     text-shadow: none;
     cursor: pointer;
 }
@@ -862,7 +873,7 @@ form.lb-collect-form input.lb-collect-btn[type="submit"] {
 form.lb-collect-form input.lb-collect-btn[type="submit"]:hover,
 form.lb-collect-form input.lb-collect-btn[type="submit"]:focus {
     background: none;
-    color: var(--lb-accent);
+    color: var(--lb-accent-dark);
     text-decoration: underline;
 }
 
