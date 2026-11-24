@@ -816,6 +816,39 @@
     white-space: nowrap;
 }
 
+/* "Post collected" marker – replaces the turn badge while a finished post waits
+   to be published; the toggle below it is deliberately small and link-like. */
+.lb-collected {
+    display: inline-block;
+    padding: 2px 8px;
+    background: var(--lb-accent-subtle);
+    color: var(--lb-accent);
+    border: 1px solid var(--lb-accent);
+    border-radius: 2px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.lb-collect-form {
+    display: block;
+    margin-top: 3px;
+}
+
+.lb-collect-btn {
+    padding: 0;
+    background: none;
+    border: 0;
+    color: var(--lb-text-muted);
+    font-size: 10px;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.lb-collect-btn:hover {
+    color: var(--lb-accent);
+}
+
 /* Scene type badges (AU / Unplayed / Planned) */
 .lb-badge-au,
 .lb-badge-unplayed,

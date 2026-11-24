@@ -66,6 +66,7 @@
                                 <li>Alle Teilnehmenden</li>
                                 <li>Ob freie Reihenfolge gilt</li>
                             </ul>
+                            <strong>Posts sammeln:</strong> Schreibst du Posts erst offline und stellst sie später gesammelt ein, klick unter <em>„Du bist dran"</em> auf <em>„als gesammelt markieren"</em>. Statt der Markierung steht dann <em>„Post gesammelt"</em>. Die Posting-Erinnerung auf der Startseite bleibt davon unberührt. Sobald du deinen nächsten Post in dieser Szene veröffentlichst, verschwindet die Markierung von allein; mit <em>„zurücknehmen"</em> entfernst du sie auch manuell.
                             Mit der <strong>Filterleiste</strong> kannst du die Liste eingrenzen:
                             <ul class="lb-guide-list">
                                 <li><strong>„Szenen, in denen ich dran bin"</strong> – zeigt nur Szenen, in denen du als Nächstes posten musst</li>

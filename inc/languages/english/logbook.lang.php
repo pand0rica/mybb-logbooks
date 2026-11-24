@@ -67,7 +67,12 @@ $l['logbook_col_action']                = "Action";
 $l['logbook_col_next_up']               = "Next up";
 $l['logbook_col_lastpost']              = "Last Post";
 $l['logbook_you_are_next']              = "You're next";
-$l['logbook_solo_participant']          = "Only 1 participant";
+$l['logbook_collected']                 = "Post collected";
+$l['logbook_collected_user']            = "%s: post collected";
+$l['logbook_collected_set']             = "mark as collected";
+$l['logbook_collected_clear']           = "undo";
+$l['logbook_collected_hint']            = "The post is written locally but not published yet. The marker disappears automatically as soon as you post in this scene again.";
+$l['logbook_solo_participant']         = "Only 1 participant";
 $l['logbook_lastpost_by']               = "by";
 
 // === Form labels ===

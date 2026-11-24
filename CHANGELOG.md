@@ -5,6 +5,7 @@ All notable changes to the Logbook plugin are documented here.
 ## [Unreleased]
 
 ### Added
+- **Collected posts.** In *My Scenes* a post that is written but not yet published can be marked as collected with a small link under the turn badge. The "You're next" badge is replaced by "Post collected"; the posting reminder on the index stays unchanged. The marker disappears automatically with the character's next post in the thread (or manually via "undo"). New column `logbook_entry.collected_at`; existing installs add it by deactivating and reactivating the plugin.
 - **rpgcalendar integration.** The Logbook delivers the viewer's scenes (normal and planned, by in-game date) to the rpgcalendar provider hooks `rpgcalendar_collect_events` / `rpgcalendar_collect_calendars` and exposes the sub-calendar "My scenes". Main accounts see the scenes of all linked characters; forum permissions are respected. The provider file is loaded lazily, so nothing changes without rpgcalendar.
 
 ### Fixed
