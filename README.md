@@ -169,6 +169,20 @@ The reminder threshold follows a priority cascade: per-scene setting → per-cha
 
 To configure a per-scene override, edit the scene and set the **Posting Reminder** field. Set it to 0 to fall back to the character or ACP default.
 
+### Collecting Posts
+
+Some players write several posts offline and publish them all at once. To keep the Logbook from nagging you in the meantime:
+
+1. Open **Logbook → My Scenes** (`logbook.php?action=my_scenes`).
+2. In a scene where it is your turn ("You're next"), click the small **mark as collected** link below the badge.
+3. The badge is replaced by **Post collected**. The posting reminder on the forum index is not affected.
+4. The marker disappears **automatically** as soon as you publish your next post in that scene's thread. It only comes back if you mark a post as collected again.
+5. Changed your mind? Click **undo** to remove the marker manually.
+
+The link is available for your own characters and for characters linked through EnhancedAccountSwitcher; other users only see the "Post collected" note. Existing installs must deactivate and reactivate the plugin once so the new `collected_at` column is added.
+
+![Step: Mark a post as collected](docs/screenshots/collected-post.png)
+
 ### Scene Statistics in Postbit and Profile
 
 In addition to the statistics on the logbook page, the plugin can show a small scene-statistics block in the author column of every post and on the member profile.

@@ -82,6 +82,7 @@ function logbook_install(): void
         `text`       TEXT COLLATE utf8_unicode_ci,
         `reminder_days` INT(4) NOT NULL DEFAULT 0,
         `name`       TEXT COLLATE utf8_unicode_ci,
+        `collected_at` INT(11) NOT NULL DEFAULT 0,
         PRIMARY KEY (`id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
 
@@ -302,9 +303,28 @@ function logbook_activate(): void
     // (Erstanlage in logbook_install(), debugging.md #21).
     logbook_install_settings();
 
+    // Upgrade-Pfad: Spalten späterer Versionen nachrüsten (idempotent).
+    logbook_upgrade_schema();
+
     logbook_install_alert_type();
 
     logbook_modify_templates();
+}
+
+/**
+ * Rüstet Tabellenspalten nach, die erst spätere Versionen einführen.
+ * Idempotent: prüft jede Spalte vor dem Anlegen (Aufruf aus activate()).
+ *
+ * @return void
+ */
+function logbook_upgrade_schema(): void
+{
+    global $db;
+
+    // v2.2.0: "post collected" marker (timestamp, 0 = not collected)
+    if (!$db->field_exists('collected_at', 'logbook_entry')) {
+        $db->add_column('logbook_entry', 'collected_at', "INT(11) NOT NULL DEFAULT 0");
+    }
 }
 
 /**
@@ -1041,7 +1061,7 @@ function logbook_db_get_scenes(int $logbook_id): array
         SELECT t.tid, t.lastposter, t.lastposteruid, t.lastpost, t.dateline, t.subject,
                s.jahr, s.monat, s.tag, s.ort, s.time, s.id, s.free_order,
                s.scene_type, s.title,
-               e.id AS entryId, e.accepted
+               e.id AS entryId, e.accepted, e.collected_at
         FROM " . TABLE_PREFIX . "logbook_entry e
         JOIN " . TABLE_PREFIX . "scene   s ON e.scene_id = s.id
         LEFT JOIN " . TABLE_PREFIX . "threads t ON t.tid = s.tid
@@ -1684,12 +1704,65 @@ function logbook_db_toggle_finished(int $scene_id, int $user_id): void
 
     $db->query("
         UPDATE " . TABLE_PREFIX . "logbook_entry
-        SET finished = NOT finished
+        SET finished = NOT finished, collected_at = 0
         WHERE scene_id = " . $scene_id . "
           AND logbook_id = (
             SELECT id FROM " . TABLE_PREFIX . "logbook WHERE user_id = " . $user_id . "
           )
     ");
+}
+
+/**
+ * Sets or clears the "post collected" marker of a user's logbook entry.
+ * The marker stores the time it was set; it counts as active only until the
+ * user posts in the scene thread again (see logbook_is_post_collected()).
+ *
+ * @param int  $scene_id Scene ID
+ * @param int  $user_id  Character (user) the entry belongs to
+ * @param bool $collected true = mark as collected now, false = clear
+ * @return void
+ */
+function logbook_db_entry_set_collected(int $scene_id, int $user_id, bool $collected): void
+{
+    global $db;
+
+    $logbook = logbook_db_get_logbook($user_id);
+    if (!$logbook) {
+        return;
+    }
+
+    $db->update_query(
+        'logbook_entry',
+        ['collected_at' => $collected ? (int)TIME_NOW : 0],
+        'scene_id = ' . $scene_id . ' AND logbook_id = ' . (int)$logbook['id']
+    );
+}
+
+/**
+ * Tells whether a user's "post collected" marker is currently active: it was
+ * set, and the user has not posted in the thread since. Posting again clears
+ * the marker automatically – no hook or cleanup needed.
+ *
+ * @param int $collected_at Value of logbook_entry.collected_at
+ * @param int $tid          Scene thread ID
+ * @param int $user_id      Character (user) the entry belongs to
+ * @return bool
+ */
+function logbook_is_post_collected(int $collected_at, int $tid, int $user_id): bool
+{
+    global $db;
+
+    if ($collected_at <= 0 || $tid <= 0) {
+        return false;
+    }
+
+    $row = $db->fetch_array($db->simple_select(
+        'posts',
+        'MAX(dateline) AS last_post',
+        'tid = ' . $tid . ' AND uid = ' . $user_id . ' AND visible = 1'
+    ));
+
+    return !$row || (int)$row['last_post'] <= $collected_at;
 }
 
 /**
@@ -2388,6 +2461,61 @@ function logbook_render_stats_block(int $uid, int $usergroup, string $additional
 }
 
 /**
+ * Renders the discreet "post collected" controls for the "next up" cell:
+ * - collected: the "Post collected" note plus a small undo button
+ * - not collected: a small "mark as collected" button (only for users who may
+ *   manage this character; everyone else sees nothing)
+ *
+ * @param int    $scene_id       Scene ID
+ * @param int    $char_uid       Character (user) the row belongs to
+ * @param bool   $is_collected   Whether the collected marker is currently active
+ * @param bool   $can_manage     Whether the viewer may change this character's marker
+ * @param bool   $viewing_own    Whether the viewer looks at their own overview
+ * @param string $char_username  Already escaped character name
+ * @param string $return_query   Current query string (for the redirect back)
+ * @return string HTML
+ */
+function logbook_render_collected_controls(
+    int $scene_id,
+    int $char_uid,
+    bool $is_collected,
+    bool $can_manage,
+    bool $viewing_own,
+    string $char_username,
+    string $return_query
+): string {
+    global $lang, $mybb;
+
+    $note = '';
+    if ($is_collected) {
+        $text = $viewing_own
+            ? $lang->logbook_collected
+            : $lang->sprintf($lang->logbook_collected_user, $char_username);
+        $note = '<span class="lb-collected" title="' . htmlspecialchars_uni($lang->logbook_collected_hint) . '">'
+                . $text . '</span>';
+    }
+
+    if (!$can_manage) {
+        return $note;
+    }
+
+    $label = $is_collected ? $lang->logbook_collected_clear : $lang->logbook_collected_set;
+
+    $form = '<form method="post" action="logbook.php" class="lb-inline-form lb-collect-form">'
+          . '<input type="hidden" name="action" value="scene_set_collected" />'
+          . '<input type="hidden" name="my_post_key" value="' . htmlspecialchars_uni($mybb->post_code) . '" />'
+          . '<input type="hidden" name="scene_id" value="' . $scene_id . '" />'
+          . '<input type="hidden" name="char_uid" value="' . $char_uid . '" />'
+          . '<input type="hidden" name="collected" value="' . ($is_collected ? 0 : 1) . '" />'
+          . '<input type="hidden" name="return_query" value="' . htmlspecialchars_uni($return_query) . '" />'
+          . '<input type="submit" class="lb-collect-btn" value="' . htmlspecialchars_uni($label) . '"'
+          . ' title="' . htmlspecialchars_uni($lang->logbook_collected_hint) . '" />'
+          . '</form>';
+
+    return $note . $form;
+}
+
+/**
  * Rendert den Charakter-Block für die my_scenes-Seite.
  * Kapselt den ~150-Zeilen-Loop aus logbook.php, damit die Frontend-Datei schlank bleibt.
  *
@@ -2420,7 +2548,11 @@ function logbook_render_my_scenes_characters(
     string $sort,
     int $no_grouping = 0
 ): array {
-    global $lang, $templates;
+    global $lang, $templates, $mybb;
+
+    // Query string of the current page, so the collected toggle can return to the
+    // same filters/sorting (whitelisted again when the action is handled).
+    $return_query = isset($_SERVER['QUERY_STRING']) ? (string)$_SERVER['QUERY_STRING'] : '';
 
     $characters        = '';
     $total_open_scenes = 0;
@@ -2434,6 +2566,7 @@ function logbook_render_my_scenes_characters(
 
     foreach ($linked_uids as $char_uid) {
         $char_username    = htmlspecialchars_uni((string)logbook_db_get_username($char_uid));
+        $can_manage_char  = logbook_user_can_manage_uid((int)$mybb->user['uid'], (int)$char_uid);
         $logbook_id       = isset($all_logbook_ids[$char_uid]) ? $all_logbook_ids[$char_uid] : 0;
         $char_rows        = '';
         $char_open_count  = 0;
@@ -2528,16 +2661,30 @@ function logbook_render_my_scenes_characters(
                 } elseif ($tid <= 0) {
                     $next_up = '–';
                 } elseif (!empty($entry['free_order'])) {
-                    $next_up = '<span class="lb-free-order">' . $lang->logbook_no_fixed_order . '</span>';
+                    $is_collected = logbook_is_post_collected((int)($entry['collected_at'] ?? 0), $tid, $char_uid);
+                    $next_up      = '<span class="lb-free-order">' . $lang->logbook_no_fixed_order . '</span>'
+                                    . logbook_render_collected_controls(
+                                        (int)$entry['id'], $char_uid, $is_collected, $can_manage_char,
+                                        $viewing_own, $char_username, $return_query
+                                    );
                     $char_max_open++;
                 } else {
                     if ($next_poster === null) {
                         $next_up = '–';
                         $char_max_open++;
                     } elseif ((int)$next_poster['user_id'] === $char_uid) {
-                        $next_up = $viewing_own
-                            ? '<span class="lb-your-turn">' . $lang->logbook_you_are_next . '</span>'
-                            : '<span class="lb-your-turn">' . $char_username . '</span>';
+                        $is_collected = logbook_is_post_collected((int)($entry['collected_at'] ?? 0), $tid, $char_uid);
+                        if ($is_collected) {
+                            $turn_badge = '';
+                        } elseif ($viewing_own) {
+                            $turn_badge = '<span class="lb-your-turn">' . $lang->logbook_you_are_next . '</span>';
+                        } else {
+                            $turn_badge = '<span class="lb-your-turn">' . $char_username . '</span>';
+                        }
+                        $next_up = $turn_badge . logbook_render_collected_controls(
+                            (int)$entry['id'], $char_uid, $is_collected, $can_manage_char,
+                            $viewing_own, $char_username, $return_query
+                        );
                         $char_min_open++;
                         $char_max_open++;
                     } else {

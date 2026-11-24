@@ -67,7 +67,12 @@ $l['logbook_col_action']                = "Aktion";
 $l['logbook_col_next_up']               = "Dran";
 $l['logbook_col_lastpost']              = "Letzter Beitrag";
 $l['logbook_you_are_next']              = "Du bist dran";
-$l['logbook_solo_participant']          = "nur 1 teilnehmende Person";
+$l['logbook_collected']                 = "Post gesammelt";
+$l['logbook_collected_user']            = "%s: Post gesammelt";
+$l['logbook_collected_set']             = "als gesammelt markieren";
+$l['logbook_collected_clear']           = "zurücknehmen";
+$l['logbook_collected_hint']            = "Der Post ist lokal vorbereitet, aber noch nicht veröffentlicht. Die Markierung verschwindet automatisch, sobald du den nächsten Post in dieser Szene schreibst.";
+$l['logbook_solo_participant']         = "nur 1 teilnehmende Person";
 $l['logbook_lastpost_by']               = "von";
 
 // === Formularfelder ===

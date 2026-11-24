@@ -197,6 +197,37 @@ if ($action === '') {
     redirect("logbook.php?action=usercp_view");
 
 // =============================================================================
+// Eigenen Post als "gesammelt" markieren / Markierung entfernen
+// =============================================================================
+} elseif ($action === 'scene_set_collected') {
+    verify_post_check($mybb->get_input('my_post_key'));
+
+    $sceneId   = $mybb->get_input('scene_id', MyBB::INPUT_INT);
+    $charUid   = $mybb->get_input('char_uid', MyBB::INPUT_INT);
+    $collected = $mybb->get_input('collected', MyBB::INPUT_INT) === 1;
+
+    // Only the character's owner (or a linked account) may change the marker,
+    // and only for scenes the character actually takes part in.
+    if ($sceneId > 0 && $charUid > 0
+        && logbook_user_can_manage_uid((int)$mybb->user['uid'], $charUid)
+        && logbook_db_is_participant($sceneId, $charUid)) {
+        logbook_db_entry_set_collected($sceneId, $charUid, $collected);
+    }
+
+    // Return to the overview with the same filters (whitelisted keys only)
+    parse_str($mybb->get_input('return_query'), $returnParams);
+    $allowedKeys = ['userId', 'filter_open', 'filter_category', 'filter_days',
+                    'filter_month', 'sort', 'filter_no_grouping'];
+    $back = ['action' => 'my_scenes'];
+    foreach ($allowedKeys as $key) {
+        if (isset($returnParams[$key]) && is_scalar($returnParams[$key])) {
+            $back[$key] = (string)$returnParams[$key];
+        }
+    }
+
+    redirect('logbook.php?' . http_build_query($back));
+
+// =============================================================================
 // Szene manuell hinzufügen (Formular)
 // =============================================================================
 } elseif ($action === 'scene_add') {
