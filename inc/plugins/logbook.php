@@ -2461,10 +2461,10 @@ function logbook_render_stats_block(int $uid, int $usergroup, string $additional
 }
 
 /**
- * Renders the discreet "post collected" controls for the "next up" cell:
- * - collected: the "Post collected" note plus a small undo button
- * - not collected: a small "mark as collected" button (only for users who may
- *   manage this character; everyone else sees nothing)
+ * Renders the "post collected" parts of a scene row:
+ * - note: the "Post collected" badge for the "next up" cell (only when collected)
+ * - form: a small link-style button for the scene cell, to mark/undo the marker
+ *   (only for users who may manage this character; everyone else gets '')
  *
  * @param int    $scene_id       Scene ID
  * @param int    $char_uid       Character (user) the row belongs to
@@ -2473,7 +2473,7 @@ function logbook_render_stats_block(int $uid, int $usergroup, string $additional
  * @param bool   $viewing_own    Whether the viewer looks at their own overview
  * @param string $char_username  Already escaped character name
  * @param string $return_query   Current query string (for the redirect back)
- * @return string HTML
+ * @return array{note: string, form: string} HTML snippets
  */
 function logbook_render_collected_controls(
     int $scene_id,
@@ -2483,7 +2483,7 @@ function logbook_render_collected_controls(
     bool $viewing_own,
     string $char_username,
     string $return_query
-): string {
+): array {
     global $lang, $mybb;
 
     $note = '';
@@ -2496,7 +2496,7 @@ function logbook_render_collected_controls(
     }
 
     if (!$can_manage) {
-        return $note;
+        return ['note' => $note, 'form' => ''];
     }
 
     $label = $is_collected ? $lang->logbook_collected_clear : $lang->logbook_collected_set;
@@ -2512,7 +2512,7 @@ function logbook_render_collected_controls(
           . ' title="' . htmlspecialchars_uni($lang->logbook_collected_hint) . '" />'
           . '</form>';
 
-    return $note . $form;
+    return ['note' => $note, 'form' => $form];
 }
 
 /**
@@ -2656,17 +2656,21 @@ function logbook_render_my_scenes_characters(
                     }
                 }
 
+                $collect_form = '';
+
                 if ($is_solo) {
                     $next_up = '<span class="lb-solo-scene">' . $lang->logbook_solo_participant . '</span>';
                 } elseif ($tid <= 0) {
                     $next_up = '–';
                 } elseif (!empty($entry['free_order'])) {
                     $is_collected = logbook_is_post_collected((int)($entry['collected_at'] ?? 0), $tid, $char_uid);
+                    $collected_ui = logbook_render_collected_controls(
+                        (int)$entry['id'], $char_uid, $is_collected, $can_manage_char,
+                        $viewing_own, $char_username, $return_query
+                    );
                     $next_up      = '<span class="lb-free-order">' . $lang->logbook_no_fixed_order . '</span>'
-                                    . logbook_render_collected_controls(
-                                        (int)$entry['id'], $char_uid, $is_collected, $can_manage_char,
-                                        $viewing_own, $char_username, $return_query
-                                    );
+                                    . $collected_ui['note'];
+                    $collect_form = $collected_ui['form'];
                     $char_max_open++;
                 } else {
                     if ($next_poster === null) {
@@ -2681,10 +2685,12 @@ function logbook_render_my_scenes_characters(
                         } else {
                             $turn_badge = '<span class="lb-your-turn">' . $char_username . '</span>';
                         }
-                        $next_up = $turn_badge . logbook_render_collected_controls(
+                        $collected_ui = logbook_render_collected_controls(
                             (int)$entry['id'], $char_uid, $is_collected, $can_manage_char,
                             $viewing_own, $char_username, $return_query
                         );
+                        $next_up      = $turn_badge . $collected_ui['note'];
+                        $collect_form = $collected_ui['form'];
                         $char_min_open++;
                         $char_max_open++;
                     } else {

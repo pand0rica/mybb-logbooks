@@ -4,7 +4,7 @@
         {$next_up}
     </td>
     <td>
-        <span class="lb-scene-subject">{$title}</span> {$scene_type_badge}
+        <div class="lb-scene-titlerow"><span class="lb-scene-subject">{$title}</span> {$scene_type_badge}<span class="lb-collect-wrap">{$collect_form}</span></div>
         <div class="logbook-thread-meta lb-scene-meta">
             <span class="logbook-thread-meta-item">
                 <svg class="lb-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="1.5" y="3" width="13" height="11" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M1.5 7h13" stroke="currentColor" stroke-width="1.3"/><path d="M5 1.5V4M11 1.5V4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
